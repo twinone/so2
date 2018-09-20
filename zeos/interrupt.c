@@ -87,3 +87,9 @@ void setIdt()
   set_idt_reg(&idtR);
 }
 
+
+
+
+
+
+

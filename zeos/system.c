@@ -54,6 +54,8 @@ inline void set_seg_regs(Word data_sel, Word stack_sel, DWord esp)
 
 }
 
+
+
 /*
  *   Main entry point to ZEOS Operating System
  */
@@ -71,6 +73,8 @@ int __attribute__((__section__(".text.main")))
   set_seg_regs(__KERNEL_DS, __KERNEL_DS, (DWord) &protected_tasks[5]);
 
   /*** DO *NOT* ADD ANY CODE IN THIS ROUTINE BEFORE THIS POINT ***/
+
+
 
   printk("Kernel Loaded!    ");
 
@@ -97,6 +101,7 @@ int __attribute__((__section__(".text.main")))
 
   /* Move user code/data now (after the page table initialization) */
   copy_data((void *) KERNEL_START + *p_sys_size, usr_main, *p_usr_size);
+
 
 
   printk("Entering user mode...");
