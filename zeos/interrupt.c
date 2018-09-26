@@ -84,6 +84,8 @@ void setIdt()
 
   // Add our keyboard_handler to the IDT at position 33
   setInterruptHandler(33, keyboard_handler, 0);
+  // add the syscall handler
+  setTrapHandler(0x80, system_call_handler, 3);
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
 
