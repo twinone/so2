@@ -4,6 +4,8 @@
 
 #include <asm.h>
 #include <segment.h>
+#include <errno.h>
+
 
 
 /**************************************************/
@@ -76,7 +78,7 @@ ENTRY(keyboard_handler)
 	RESTORE_ALL
 	iret
 
-#define NUM_SYSCALLS 4
+
 ENTRY(system_call_handler)
 	SAVE_ALL
 	cmpl $0, %EAX
@@ -86,11 +88,18 @@ ENTRY(system_call_handler)
 	call *sys_call_table(, %EAX, 0x04)
 	jmp fin
 err:    movl $-ENOSYS, %EAX
-fin:	movl %EAX, 0x18(%esp)
+fin:	movl %EAX, 24(%esp)
 	RESTORE_ALL
 	iret
 
 
+
+ENTRY(clock_handler)
+	SAVE_ALL
+	EOI
+	call clock_routine
+	RESTORE_ALL
+	iret
 
 
 

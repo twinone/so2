@@ -13,6 +13,8 @@
 
 #include <sched.h>
 
+#include <system.h>
+
 #define LECTURA 0
 #define ESCRIPTURA 1
 
@@ -27,6 +29,26 @@ int sys_ni_syscall()
 {
 	return -38; /*ENOSYS*/
 }
+
+
+int sys_write(int fd, char *buf, int size) {
+	int e = check_fd(fd, ESCRIPTURA);
+	if (e) return e;
+	
+	if (buf == NULL) return -22;  /* Invalid argument */
+	if (size < 0) return -22; // use 0 for flush?
+	
+	// copy the data from user memory
+	char *mybuf = NULL;
+	copy_from_user(buf, mybuf, size);
+
+	sys_write_console(mybuf, size);
+}
+
+int sys_gettime() {
+	return zeos_ticks;
+}
+
 
 int sys_getpid()
 {

@@ -6,6 +6,7 @@
 #include <segment.h>
 #include <hardware.h>
 #include <io.h>
+#include <system.h>
 
 #include <zeos_interrupt.h>
 
@@ -86,6 +87,8 @@ void setIdt()
   setInterruptHandler(33, keyboard_handler, 0);
   // add the syscall handler
   setTrapHandler(0x80, system_call_handler, 3);
+  // add clock interrupt handler
+  setInterruptHandler(32, clock_handler, 0);
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
 
@@ -104,6 +107,12 @@ void keyboard_routine() {
 	if (key < 32) printc_xy(0, 0, 'C');		
 	else printc_xy(0,0,key);
 }
+
+
+void clock_routine() {
+    zeos_ticks++;
+}
+
 
 
 

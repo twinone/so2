@@ -19,7 +19,9 @@ void setIdt();
 
 
 void keyboard_routine();
+void clock_routine();
 void keyboard_handler();
+void clock_handler();
 void system_call_handler();
 
 
