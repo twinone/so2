@@ -82,6 +82,9 @@ void setIdt()
   
   set_handlers();
 
+  // Add our keyboard_handler to the IDT at position 33
+  setInterruptHandler(33, keyboard_handler, 0);
+
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
 
   set_idt_reg(&idtR);
@@ -89,6 +92,16 @@ void setIdt()
 
 
 
+void keyboard_routine() {
+	unsigned char keyCode = inb(0x60);
+	char make = !(keyCode >> 7);
+	if (!make) return;
+
+	unsigned char key = char_map[keyCode];
+        // < 32 are non printable ascii
+	if (key < 32) printc_xy(0, 0, 'C');		
+	else printc_xy(0,0,key);
+}
 
 
 

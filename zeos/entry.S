@@ -70,6 +70,10 @@
 	
      
 ENTRY(keyboard_handler)
- SAVE_ALL
-	
+	SAVE_ALL
+	EOI
+	call keyboard_routine
+	RESTORE_ALL
+	iret
+
 
