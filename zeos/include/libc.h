@@ -25,8 +25,11 @@ void exit();
 
 
 // syscall function wrappers
-int gettime();
-int write();
+extern int write_wrap(int fd, char* buffer, int size);
+int write(int fd, char *buffer, int size);
+
+extern int gettime_wrap();
+int gettime ();
 
 extern int errno;
 

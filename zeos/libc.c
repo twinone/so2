@@ -44,26 +44,7 @@ int strlen(char *a)
 }
 
 
-/*
-int gettime() {
-	__asm__ volatile(
-		"movl $10, %eax;"
-		"int $0x80;"
-	);
-}
-*/
 
-/* lo que queremos
-000000d0 <gettime>:
-  d0:   55                      push   %ebp
-  d1:   b8 0a 00 00 00          mov    $0xa,%eax
-  d6:   89 e5                   mov    %esp,%ebp
-  d8:   cd 80                   int    $0x80
-  da:   5d                      pop    %ebp
-  db:   c3                      ret    
-  dc:   8d 74 26 00             lea    0x0(%esi,%eiz,1),%esi
-
-*/
 
 void perror() {
 	switch (errno) {
@@ -74,7 +55,8 @@ void perror() {
 }
 
 
-
+int write(int fd, char *buffer, int size) { return write_wrap(fd, buffer, size); }
+int gettime() { return gettime_wrap(); };
 
 
 

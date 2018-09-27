@@ -14,6 +14,7 @@
 #include <sched.h>
 
 #include <system.h>
+#include <errno.h>
 
 #define LECTURA 0
 #define ESCRIPTURA 1
@@ -32,18 +33,28 @@ int sys_ni_syscall()
 
 
 
+#define BLOCK_SIZE 4
 int sys_write(int fd, char *buf, int size) {
 	int e = check_fd(fd, ESCRIPTURA);
 
-	if (e) return e;
+	if (e) return -e;
 	
-	if (buf == NULL) return -22;  /* Invalid argument */
-	if (size < 0) return -22; // use 0 for flush?
+	if (buf == NULL) return EFAULT;  /* Invalid argument */
+	if (size < 0) return EINVAL; // use 0 for flush?
 	
-	char mybuf[size]; // buffer it!
-	copy_from_user(buf, mybuf, size);
-	sys_write_console(mybuf, size);
-	return size;
+	char mybuf[BLOCK_SIZE];
+	int offset = 0;
+	while (offset + BLOCK_SIZE < size) {
+		copy_from_user(buf+offset, mybuf, BLOCK_SIZE);
+		sys_write_console(mybuf, BLOCK_SIZE);
+		offset += BLOCK_SIZE;
+	}
+	if (offset < size) {
+		int res = size - offset;
+		copy_from_user(buf+offset, mybuf, res);
+		sys_write_console(mybuf, res);
+	}
+	return 0;
 }
 
 int sys_gettime() {
