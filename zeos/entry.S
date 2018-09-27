@@ -121,8 +121,3 @@ ENTRY(clock_handler)
 
 
 
-
-
-
-
-

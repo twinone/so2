@@ -42,51 +42,16 @@ int strlen(char *a)
   
   return i;
 }
-int write (int fd, char *buffer, int size) {
-	int ret;
-	__asm__ volatile( 
-				"int $0x80"
-				:"=a" (ret), 		// resultat de %eax a ret
-				"+b" (fd), 
-				"+c" (buffer),
-				"+d" (size)
-				:"a"  (4)
-	);
-	if (ret < 0) {
-		errno = -ret;
-		ret = -1;
-	}
-	return ret;
-}
 
 
-int write2 (int fd, char * buffer, int size)
-{
-volatile int ret = 0;
-
-  __asm__ volatile(
-	"movl 8(%ebp), %ebx;"
-	"movl 12(%ebp), %ecx;"
-	"movl 16(%ebp), %edx;"
-	"movl $4, %eax;"
-	"int $0x80;"
-	// errno <- %eax
-  );
- // so GCC doesn't complain
-}
-
-int gettime() {
 /*
-  __asm__ volatile(
-	
-  );
-*/
-
-	__asm__ volatile( 
+int gettime() {
+	__asm__ volatile(
 		"movl $10, %eax;"
 		"int $0x80;"
 	);
 }
+*/
 
 /* lo que queremos
 000000d0 <gettime>:

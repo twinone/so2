@@ -36,7 +36,7 @@ int __attribute__ ((__section__(".text.main")))
 
 
 
-
+	for (int i = 0; i < 75000; i++) { gettime(); }
 	int t = gettime();
 	write(1, "holi\n", 5);
 

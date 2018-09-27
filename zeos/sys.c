@@ -31,17 +31,17 @@ int sys_ni_syscall()
 }
 
 
+
 int sys_write(int fd, char *buf, int size) {
 	int e = check_fd(fd, ESCRIPTURA);
+
 	if (e) return e;
 	
 	if (buf == NULL) return -22;  /* Invalid argument */
 	if (size < 0) return -22; // use 0 for flush?
 	
-	// copy the data from user memory
-	char *mybuf = NULL;
+	char mybuf[size]; // buffer it!
 	copy_from_user(buf, mybuf, size);
-
 	sys_write_console(mybuf, size);
 }
 
