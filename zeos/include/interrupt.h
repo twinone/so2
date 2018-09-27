@@ -25,6 +25,10 @@ void clock_handler();
 void system_call_handler();
 
 
+extern void syscall_handler_sysenter();
+extern void writeMSR(int addr, int val);
+
+
 
 
 #endif  /* __INTERRUPT_H__ */

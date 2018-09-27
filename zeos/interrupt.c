@@ -90,6 +90,11 @@ void setIdt()
   // add clock interrupt handler
   setInterruptHandler(32, clock_handler, 0);
 
+	// init the MSR registers
+	writeMSR(0x174, __KERNEL_CS);
+	writeMSR(0x175, INITIAL_ESP);
+	writeMSR(0x176, syscall_handler_sysenter);
+
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
 
   set_idt_reg(&idtR);
