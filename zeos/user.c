@@ -36,12 +36,13 @@ int __attribute__ ((__section__(".text.main")))
 
 
 
-	for (int i = 0; i < 75000; i++) { gettime(); }
-	int t = gettime();
+	// check that gettime works 75k iters = 19, 100k iter = 25, works
+	// for (int i = 0; i < 75000; i++) { gettime(); }
+//	int t = gettime();
 	write(1, "holi\n", 5);
 
 
-	while (t) {}
+	while (1) {}
 
 
 	return 0;

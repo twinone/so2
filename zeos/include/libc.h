@@ -20,7 +20,10 @@ int fork();
 
 void exit();
 
+
+// syscall function wrappers
 int gettime();
+int write();
 
 
 #endif  /* __LIBC_H__ */
