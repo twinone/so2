@@ -18,12 +18,17 @@ int getpid();
 
 int fork();
 
+
+void perror();
+
 void exit();
 
 
 // syscall function wrappers
 int gettime();
 int write();
+
+extern int errno;
 
 
 #endif  /* __LIBC_H__ */

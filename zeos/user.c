@@ -27,7 +27,7 @@ long outer (long n) {
 	return acum;
 }
 
-
+extern void runjp();
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
@@ -39,10 +39,13 @@ int __attribute__ ((__section__(".text.main")))
 	// check that gettime works 75k iters = 19, 100k iter = 25, works
 	// for (int i = 0; i < 75000; i++) { gettime(); }
 //	int t = gettime();
-	write(1, "holi\n", 5);
+	//int n =	write(1, "holi\n", 5);
+	//n = errno;
 
+//	perror();
 
-	while (1) {}
+	runjp();
+	while(1);
 
 
 	return 0;

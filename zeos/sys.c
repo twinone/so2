@@ -43,7 +43,7 @@ int sys_write(int fd, char *buf, int size) {
 	char mybuf[size]; // buffer it!
 	copy_from_user(buf, mybuf, size);
 	sys_write_console(mybuf, size);
-	return 0;
+	return size;
 }
 
 int sys_gettime() {
