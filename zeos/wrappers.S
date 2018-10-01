@@ -34,7 +34,7 @@ ENTRY(gettime_wrap)
 	mov %esp, %ebp
 	push %ecx // save ecx
 	push %edx // save edx
-	lea ret, %eax // sysenter return correctly
+	lea ret2, %eax // sysenter return correctly
 	push %eax
 	push %ebp // fake dynamic link
 	movl %esp, %ebp
