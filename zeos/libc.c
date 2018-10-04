@@ -181,7 +181,7 @@ char* msg(int errno) {
 		case 132: return "Operation not possible due to RF-kill"; break;
 		case 133: return "Memory page has hardware error"; break;
 	}
-	return "Si lees esto o eres el profesor corrigiendo o la has liado parda";
+	return "Si lees esto o eres el profesor corrigiendo o la has liado muy parda";
 }
 
 

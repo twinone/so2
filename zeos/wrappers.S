@@ -6,8 +6,6 @@ ENTRY(write)
 	push %ecx // save ecx
 	push %edx // save edx
 	push %ebx // save ebx
-	push %esi // save ebx
-	push %edi // save ebx
 
 	mov 16(%ebp), %edx   #size
 	mov 12(%ebp), %ecx   #buffer
@@ -32,8 +30,6 @@ ret:    pop %ebp
 
 end_err:mov 16(%ebp), %eax // if write succeeds, the written bytes are equal to the size parameter
 end:    
-	pop %edi
-	pop %esi
 	pop %ebx
 	pop %edx
 	pop %ecx
@@ -50,8 +46,6 @@ ENTRY(gettime)
 	push %ecx // save ecx
 	push %edx // save edx
 	push %ebx // save ebx
-	push %esi // save ebx
-	push %edi // save ebx
 
 	lea ret2, %eax // sysenter return correctly
 	push %eax
@@ -62,9 +56,6 @@ ENTRY(gettime)
 ret2:   pop %ebp
 	add $4, %esp
 
-
-	pop %edi
-	pop %esi
 	pop %ebx
 	pop %edx
 	pop %ecx

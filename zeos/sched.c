@@ -1,10 +1,15 @@
 /*
- * sched.c - initializes struct for task 0 anda task 1
+ * sched.c - initializes struct for task 0 and task 1
  */
 
 #include <sched.h>
 #include <mm.h>
 #include <io.h>
+
+struct list_head freequeue;
+struct list_head readyqueue;
+
+
 
 /**
  * Container for the Task array and 2 additional pages (the first and the last one)
@@ -59,18 +64,23 @@ void cpu_idle(void)
 	}
 }
 
-void init_idle (void)
-{
-
+void init_idle () {
 }
 
-void init_task1(void)
-{
+void init_task1() {
 }
 
 
-void init_sched(){
+void init_sched() {
+	INIT_LIST_HEAD(&freequeue);
+	INIT_LIST_HEAD(&readyqueue);
+	
 
+
+	for (int i = 0; i < NR_TASKS; i++) {
+		struct task_struct *el = &task[i]; // is a task union, but we can use it either way
+		list_add(&(el->anchor), &freequeue);
+	}	
 }
 
 struct task_struct* current()
