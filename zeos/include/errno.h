@@ -19,7 +19,7 @@
 
 #define	ENOTEMPTY	39	/* Directory not empty */
 #define	ELOOP		40	/* Too many symbolic links encountered */
-#define	EWOULDBLOCK	EAGAIN	/* Operation would block */
+
 #define	ENOMSG		42	/* No message of desired type */
 #define	EIDRM		43	/* Identifier removed */
 #define	ECHRNG		44	/* Channel number out of range */
@@ -36,8 +36,6 @@
 #define	ENOANO		55	/* No anode */
 #define	EBADRQC		56	/* Invalid request code */
 #define	EBADSLT		57	/* Invalid slot */
-
-#define	EDEADLOCK	EDEADLK
 
 #define	EBFONT		59	/* Bad font file format */
 #define	ENOSTR		60	/* Device not a stream */

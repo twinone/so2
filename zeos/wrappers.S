@@ -1,12 +1,18 @@
 #include<asm.h>
-ENTRY(write_wrap)
+ENTRY(write)
 	push %ebp
 	mov %esp, %ebp
+
+	push %ecx // save ecx
+	push %edx // save edx
+	push %ebx // save ebx
+	push %esi // save ebx
+	push %edi // save ebx
+
 	mov 16(%ebp), %edx   #size
 	mov 12(%ebp), %ecx   #buffer
 	mov 8(%ebp), %ebx    #fd
-	push %ecx // save ecx
-	push %edx // save edx
+
 	lea ret, %eax // sysenter return correctly
 	push %eax
 	push %ebp // fake dynamic link
@@ -15,25 +21,38 @@ ENTRY(write_wrap)
 	sysenter
 ret:    pop %ebp
 	add $4, %esp // remove the lea
-	pop %edx
-	pop %ecx
+	
 	cmp $0, %eax // check return value of the implementation
-	je end_err
+	je end_err // if 0, leave it as is, the syscall succeeded
+	// if syscall fails, store the reason in errno
 	lea errno, %ebx
 	mov %eax, (%ebx)
-	mov $-1, %eax 
+	mov $-1, %eax // return -1
 	jmp end
-end_err:mov 16(%ebp), %eax
-end:    mov %ebp, %esp
+
+end_err:mov 16(%ebp), %eax // if write succeeds, the written bytes are equal to the size parameter
+end:    
+	pop %edi
+	pop %esi
+	pop %ebx
+	pop %edx
+	pop %ecx
+
+	mov %ebp, %esp
 	pop %ebp
 	ret
 
 
-ENTRY(gettime_wrap)
+ENTRY(gettime)
 	push %ebp
 	mov %esp, %ebp
+
 	push %ecx // save ecx
 	push %edx // save edx
+	push %ebx // save ebx
+	push %esi // save ebx
+	push %edi // save ebx
+
 	lea ret2, %eax // sysenter return correctly
 	push %eax
 	push %ebp // fake dynamic link
@@ -42,8 +61,14 @@ ENTRY(gettime_wrap)
 	sysenter
 ret2:   pop %ebp
 	add $4, %esp
+
+
+	pop %edi
+	pop %esi
+	pop %ebx
 	pop %edx
 	pop %ecx
+
    	mov %ebp, %esp
 	pop %ebp
 	ret
