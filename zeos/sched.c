@@ -72,6 +72,7 @@ void init_task1() {
 
 
 void init_sched() {
+
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);
 	
@@ -81,6 +82,7 @@ void init_sched() {
 		struct task_struct *el = &task[i]; // is a task union, but we can use it either way
 		list_add(&(el->anchor), &freequeue);
 	}	
+
 }
 
 struct task_struct* current()
