@@ -85,10 +85,41 @@ void init_idle () {
 	u->stack[KERNEL_STACK_SIZE-1] = &cpu_idle;
 	u->stack[KERNEL_STACK_SIZE-2] = 42;
 	
-	idle_task->esp = &u->stack[KERNEL_STACK_SIZE-2];
+	idle_task->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
 }
 
+
+extern int (*usr_main)(void);
+extern void writeMSR(int reg, int val);
+
 void init_task1() {
+
+	struct list_head *e = list_first(&freequeue);
+	list_del(e); 
+	struct task_struct *t = list_entry(e, struct task_struct, anchor);
+	
+	t->PID = 1;
+	allocate_DIR(t);
+	set_user_pages(t);
+
+        // initialize the fake context for this process
+	// we need to set %esp to &task[1] and push @cpu_idle, push 42 so that task_switch can
+	// undo this fake dynamic link
+	union task_union *u = (union task_union *) t;
+	u->stack[KERNEL_STACK_SIZE-1] = &usr_main;
+	u->stack[KERNEL_STACK_SIZE-2] = 0; // has to be a 0 here
+	
+	t->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
+
+
+	// 4
+  	tss.esp = t->kernel_esp;
+	writeMSR(0x175, t->kernel_esp);
+
+
+	// 5
+	set_cr3(t->dir_pages_baseAddr);
+
 }
 
 
@@ -104,18 +135,6 @@ void init_sched() {
 		el->PID = i;
 		list_add_tail(&(el->anchor), &freequeue);
 	}
-
-	init_idle();
-	init_task1();
-
-
-	//printk("Current process:\n");
-	//char buf[30];
-	//itoa(current()->PID, &buf);
-
-	//printk(buf);
-	//printk("\n");
-
 }
 
 
