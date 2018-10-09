@@ -88,6 +88,11 @@ void init_idle () {
 	idle_task->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
 }
 
+void update_esp(int esp) {
+  	tss.esp0 = esp;
+	writeMSR(0x175, esp);
+}
+
 
 extern int (*usr_main)(void);
 extern void writeMSR(int reg, int val);
@@ -113,8 +118,7 @@ void init_task1() {
 
 
 	// 4
-  	tss.esp = t->kernel_esp;
-	writeMSR(0x175, t->kernel_esp);
+	update_esp(t->kernel_esp);
 
 
 	// 5
@@ -131,11 +135,18 @@ void init_sched() {
 
 	for (int i = 0; i < NR_TASKS; i++) {
 		struct task_struct *el = &task[i];
-		// to debug we assign an initial PID ge 10, will be overwritten when task_switching
-		el->PID = i;
+
 		list_add_tail(&(el->anchor), &freequeue);
 	}
 }
+
+
+void inner_task_switch(union task_union *new) {
+	update_esp(new->task.kernel_esp);
+	set_cr3(new->task.dir_pages_baseAddr);
+//	inner_inner_task_switch
+}
+
 
 
 struct task_struct* current()

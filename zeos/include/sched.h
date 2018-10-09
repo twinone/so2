@@ -17,11 +17,14 @@
 enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
 
 struct task_struct {
-  int PID;			/* Process ID. This MUST be the first field of the struct. */
-  page_table_entry *dir_pages_baseAddr;
-  int kernel_esp;
+	// THIS STRUCTURE HAS ITS FIELDS ACCESSED IN ASSEMBLY
+	// ALWAYS ADD NEW FIELDS TO THE END OF THIS STRUCTURE AND NEVER REMOVE ANYTHING
+  int PID; // used in asm
+  page_table_entry *dir_pages_baseAddr; // used in asm
+  int kernel_esp; // used in asm
   struct list_head anchor;
-  
+  int ebp;
+
 };
 
 union task_union {
@@ -56,6 +59,9 @@ int allocate_DIR(struct task_struct *t);
 page_table_entry * get_PT (struct task_struct *t) ;
 
 page_table_entry * get_DIR (struct task_struct *t) ;
+
+void inner_task_switch(union task_union *new);
+extern void task_switch(union task_union *new);
 
 /* Headers for the scheduling policy */
 void sched_next_rr();

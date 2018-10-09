@@ -139,21 +139,29 @@ sysenter_fin:
 	sysexit
 
 
+// we have to code this in assembly because inline asm is not allowed
+ENTRY(task_switch) // @new parameter
+	push %ebp
+	movl %esp, %ebp
+
+	push %esi
+	push %edi
+	push %ebx
+
+	call inner_task_switch
+
+	pop %ebx
+	pop %edi
+	pop %esi
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+	
+	pop %ebp
+	ret
+	
 
 
 
