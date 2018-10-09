@@ -78,7 +78,7 @@ int __attribute__((__section__(".text.main")))
 
 
 
-  printk("Kernel Loaded!    ");
+  printk("Kernel Loaded!\n");
 
   zeos_ticks = 0;
 

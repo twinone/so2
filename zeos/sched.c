@@ -5,6 +5,10 @@
 #include <sched.h>
 #include <mm.h>
 #include <io.h>
+#include <libc.h>
+
+
+struct task_struct *idle_task;
 
 struct list_head freequeue;
 struct list_head readyqueue;
@@ -46,7 +50,7 @@ page_table_entry * get_PT (struct task_struct *t)
 int allocate_DIR(struct task_struct *t) 
 {
 	int pos;
-
+	// position of the task_struct in the task vector
 	pos = ((int)t-(int)task)/sizeof(union task_union);
 
 	t->dir_pages_baseAddr = (page_table_entry*) &dir_pages[pos]; 
@@ -54,17 +58,34 @@ int allocate_DIR(struct task_struct *t)
 	return 1;
 }
 
-void cpu_idle(void)
-{
+void cpu_idle(void) {
 	__asm__ __volatile__("sti": : :"memory");
-
-	while(1)
-	{
-	;
+	printk("\n\n\n\n\n");
+	while(1){
+		printk("idle ");
 	}
 }
 
 void init_idle () {
+
+	// Get the first element of the list
+	struct list_head *e = list_first(&freequeue);
+	// Remove the selected element from the list
+	list_del(e); 
+	// Get the container of this list element
+	idle_task = list_entry(e, struct task_struct, anchor);
+	
+	idle_task->PID = 0;
+	allocate_DIR(idle_task);
+
+        // initialize the fake context for this process
+	// we need to set %esp to &task[1] and push @cpu_idle, push 42 so that task_switch can
+	// undo this fake dynamic link
+	union task_union *u = (union task_union *) idle_task;
+	u->stack[KERNEL_STACK_SIZE-1] = &cpu_idle;
+	u->stack[KERNEL_STACK_SIZE-2] = 42;
+	
+	idle_task->esp = &u->stack[KERNEL_STACK_SIZE-2];
 }
 
 void init_task1() {
@@ -75,15 +96,28 @@ void init_sched() {
 
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);
-	
 
 
 	for (int i = 0; i < NR_TASKS; i++) {
-		struct task_struct *el = &task[i]; // is a task union, but we can use it either way
-		list_add(&(el->anchor), &freequeue);
-	}	
+		struct task_struct *el = &task[i];
+		// to debug we assign an initial PID ge 10, will be overwritten when task_switching
+		el->PID = i;
+		list_add_tail(&(el->anchor), &freequeue);
+	}
+
+	init_idle();
+	init_task1();
+
+
+	//printk("Current process:\n");
+	//char buf[30];
+	//itoa(current()->PID, &buf);
+
+	//printk(buf);
+	//printk("\n");
 
 }
+
 
 struct task_struct* current()
 {
