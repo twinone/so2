@@ -64,3 +64,29 @@ ret2:   pop %ebp
 	pop %ebp
 	ret
 
+ENTRY(getpid)
+	push %ebp
+	mov %esp, %ebp
+
+	push %ecx // save ecx
+	push %edx // save edx
+	push %ebx // save ebx
+
+	lea ret3, %eax // sysenter return correctly
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $20, %eax
+	sysenter
+ret3:   pop %ebp
+	add $4, %esp
+
+	pop %ebx
+	pop %edx
+	pop %ecx
+
+   	mov %ebp, %esp
+	pop %ebp
+	ret
+
+

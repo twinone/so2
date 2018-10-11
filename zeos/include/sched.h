@@ -61,6 +61,11 @@ page_table_entry * get_DIR (struct task_struct *t) ;
 void inner_task_switch(union task_union *new);
 extern void task_switch(union task_union *new);
 
+
+extern int (*usr_main)(void);
+extern void writeMSR(int reg, int val);
+extern void inner_inner_task_switch();
+
 extern void save_ebp();
 
 /* Headers for the scheduling policy */

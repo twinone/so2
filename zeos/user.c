@@ -4,6 +4,15 @@
 
 int pid;
 
+void writepid() {
+	int pid = getpid();
+	char buf[5];
+	itoa(pid, buf);
+	write(1, "pid: ", 5);
+	write(1, buf, strlen(buf));
+	write(1, "\n", 1);
+}
+
 
 extern void runjp();
 int __attribute__ ((__section__(".text.main")))
@@ -15,8 +24,7 @@ int __attribute__ ((__section__(".text.main")))
 	char *str = "Hello from userland\n";
 	write(1, str, strlen(str));
 
-
-
+	writepid();
 
 	while(1) {
 
@@ -24,3 +32,4 @@ int __attribute__ ((__section__(".text.main")))
 
 	return 0;
 }
+

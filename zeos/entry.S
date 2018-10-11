@@ -140,6 +140,7 @@ sysenter_fin:
 
 
 
+
 ENTRY(task_switch) // @new parameter
 	push %ebp
 	movl %esp, %ebp

@@ -91,8 +91,6 @@ void update_esp(int esp) {
 }
 
 
-extern int (*usr_main)(void);
-extern void writeMSR(int reg, int val);
 
 void init_task1() {
 
@@ -136,7 +134,7 @@ void init_sched() {
 
 
 
-extern void inner_inner_task_switch();
+
 
 void inner_task_switch(union task_union *new) {
 	update_esp(&new->stack[KERNEL_STACK_SIZE]);
