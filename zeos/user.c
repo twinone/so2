@@ -18,7 +18,9 @@ int __attribute__ ((__section__(".text.main")))
 
 
 
-	while(1);
+	while(1) {
+
+	}
 
 	return 0;
 }

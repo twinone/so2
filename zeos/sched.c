@@ -108,14 +108,10 @@ void init_task1() {
 	// we need to set %esp to &task[1] and push @cpu_idle, push 42 so that task_switch can
 	// undo this fake dynamic link
 	union task_union *u = (union task_union *) t;
-	u->stack[KERNEL_STACK_SIZE-1] = &usr_main;
-	u->stack[KERNEL_STACK_SIZE-2] = 0; // has to be a 0 here
 	
-	t->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
-
-
+	
 	// 4
-	update_esp(t->kernel_esp);
+	update_esp(&u->stack[KERNEL_STACK_SIZE]);
 
 
 	// 5
@@ -133,6 +129,7 @@ void init_sched() {
 	for (int i = 0; i < NR_TASKS; i++) {
 		struct task_struct *el = &task[i];
 		el->PID = i;
+		//el->kernel_esp = el+KERNEL_STACK_SIZE-2;
 		list_add_tail(&(el->anchor), &freequeue);
 	}
 }
@@ -142,25 +139,16 @@ void init_sched() {
 extern void hacky_asm();
 
 void inner_task_switch(union task_union *new) {
-
-
-	int ebp = *(&new-2);
-
-//	printk("hacky my ebp is: ");
-//	char buf[20];
-//	itoa(ebp, &buf);
-//	printk(buf);
-//	printk("\n");
-
-	update_esp(new->task.kernel_esp);
-	set_cr3(new->task.dir_pages_baseAddr);
-
-
-	current()->ebp = ebp;
-
-
-	while(1) {}
 	
+	 // push ebp
+
+	update_esp(&new->stack[KERNEL_STACK_SIZE]);
+	set_cr3(new->task.dir_pages_baseAddr);
+	
+	
+	hacky_asm(new->task.kernel_esp, &(current()->kernel_esp));
+	
+
 }
 
 

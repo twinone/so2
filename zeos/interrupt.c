@@ -101,6 +101,8 @@ void setIdt()
 }
 
 
+int c_task = 1;
+
 
 void keyboard_routine() {
 	unsigned char keyCode = inb(0x60);
@@ -111,20 +113,23 @@ void keyboard_routine() {
         // < 32 are non printable ascii
 	if (key < 32) printc_xy(0, 0, 'C');		
 	else printc_xy(0,0,key);
+
+
+	// Very very ugly task switching
+	if (c_task == 0) c_task = 1;
+	else c_task = 0;
+	task_switch(&task[c_task]);
 }
 
 
-int c_task = 0;
+
 
 void clock_routine() {
     zeos_ticks++;
     zeos_show_clock();
 
 
-	// Very very ugly task switching
-    if (c_task == 0) c_task = 1;
-    else c_task = 0;
-    task_switch(&task[c_task]);
+
 }
 
 

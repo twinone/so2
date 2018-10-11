@@ -149,9 +149,9 @@ ENTRY(task_switch) // @new parameter
 	push %ebx
 
 	push 8(%ebp)
-	call inner_task_switch
+	call inner_task_switch // when returning, task switch is done
 
-	sub $4, %esp
+	add $4, %esp // don't pop the parameter into ebx
 
 	pop %ebx
 	pop %edi
@@ -163,5 +163,15 @@ ENTRY(task_switch) // @new parameter
 
 
 ENTRY(hacky_asm)
+	push %ebp
+	mov %esp, %ebp
+
+	mov 8(%ebp), %esp
+	mov 12(%ebp), %eax
+	mov %ebp, (%eax)
+
+popebp:
+	pop %ebp
+	ret
  
 

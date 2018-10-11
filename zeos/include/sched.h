@@ -23,8 +23,6 @@ struct task_struct {
   page_table_entry *dir_pages_baseAddr; // used in asm
   int kernel_esp; // used in asm
   struct list_head anchor;
-  int ebp;
-
 };
 
 union task_union {
