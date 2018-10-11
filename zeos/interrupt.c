@@ -101,7 +101,7 @@ void setIdt()
 }
 
 
-int c_task = 1;
+
 
 
 void keyboard_routine() {
@@ -116,9 +116,9 @@ void keyboard_routine() {
 
 
 	// Very very ugly task switching
-	if (c_task == 0) c_task = 1;
-	else c_task = 0;
-	task_switch(&task[c_task]);
+	if (key == '0') task_switch(&task[0]);
+	if (key == '1') task_switch(&task[1]);
+	if (key == '2') task_switch(&task[2]);
 }
 
 

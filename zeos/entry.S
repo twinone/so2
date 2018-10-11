@@ -173,5 +173,12 @@ ENTRY(inner_inner_task_switch)
 
 	pop %ebp
 	ret
- 
+
+ENTRY(getebp)
+	mov %ebp, %eax
+	ret
+
+ENTRY(ret_from_fork)
+	RESTORE_ALL
+	iret
 

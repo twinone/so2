@@ -90,3 +90,30 @@ ret3:   pop %ebp
 	ret
 
 
+
+ENTRY(fork)
+	push %ebp
+	mov %esp, %ebp
+
+	push %ecx // save ecx
+	push %edx // save edx
+	push %ebx // save ebx
+
+	lea ret4, %eax // sysenter return correctly
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $2, %eax
+	sysenter
+ret4:   pop %ebp
+	add $4, %esp
+
+	pop %ebx
+	pop %edx
+	pop %ecx
+
+   	mov %ebp, %esp
+	pop %ebp
+	ret
+
+

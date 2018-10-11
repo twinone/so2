@@ -24,11 +24,14 @@ int __attribute__ ((__section__(".text.main")))
 	char *str = "Hello from userland\n";
 	write(1, str, strlen(str));
 
-	writepid();
+//	writepid();
 
-	while(1) {
+	//int p = fork();
+	
+	//if (p == 0) write(1, "child\n", 6);
+	//else write(1, "parent\n", 7);
 
-	}
+	while(1) { write(1,"a",0);}
 
 	return 0;
 }
