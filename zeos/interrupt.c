@@ -114,9 +114,17 @@ void keyboard_routine() {
 }
 
 
+int c_task = 0;
+
 void clock_routine() {
     zeos_ticks++;
     zeos_show_clock();
+
+
+	// Very very ugly task switching
+    if (c_task == 0) c_task = 1;
+    else c_task = 0;
+    task_switch(&task[c_task]);
 }
 
 

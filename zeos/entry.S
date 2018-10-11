@@ -139,7 +139,7 @@ sysenter_fin:
 	sysexit
 
 
-// we have to code this in assembly because inline asm is not allowed
+
 ENTRY(task_switch) // @new parameter
 	push %ebp
 	movl %esp, %ebp
@@ -148,21 +148,20 @@ ENTRY(task_switch) // @new parameter
 	push %edi
 	push %ebx
 
+	push 8(%ebp)
 	call inner_task_switch
+
+	sub $4, %esp
 
 	pop %ebx
 	pop %edi
 	pop %esi
-
-
-
-
-
 	
 	pop %ebp
 	ret
 	
 
 
-
+ENTRY(hacky_asm)
+ 
 

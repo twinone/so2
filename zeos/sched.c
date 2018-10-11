@@ -60,10 +60,7 @@ int allocate_DIR(struct task_struct *t)
 
 void cpu_idle(void) {
 	__asm__ __volatile__("sti": : :"memory");
-	printk("\n\n\n\n\n");
-	while(1){
-		printk("idle ");
-	}
+	while(1){}
 }
 
 void init_idle () {
@@ -135,16 +132,35 @@ void init_sched() {
 
 	for (int i = 0; i < NR_TASKS; i++) {
 		struct task_struct *el = &task[i];
-
+		el->PID = i;
 		list_add_tail(&(el->anchor), &freequeue);
 	}
 }
 
 
+
+extern void hacky_asm();
+
 void inner_task_switch(union task_union *new) {
+
+
+	int ebp = *(&new-2);
+
+//	printk("hacky my ebp is: ");
+//	char buf[20];
+//	itoa(ebp, &buf);
+//	printk(buf);
+//	printk("\n");
+
 	update_esp(new->task.kernel_esp);
 	set_cr3(new->task.dir_pages_baseAddr);
-//	inner_inner_task_switch
+
+
+	current()->ebp = ebp;
+
+
+	while(1) {}
+	
 }
 
 
