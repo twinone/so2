@@ -136,19 +136,12 @@ void init_sched() {
 
 
 
-extern void hacky_asm();
+extern void inner_inner_task_switch();
 
 void inner_task_switch(union task_union *new) {
-	
-	 // push ebp
-
 	update_esp(&new->stack[KERNEL_STACK_SIZE]);
 	set_cr3(new->task.dir_pages_baseAddr);
-	
-	
-	hacky_asm(new->task.kernel_esp, &(current()->kernel_esp));
-	
-
+	inner_inner_task_switch(new->task.kernel_esp, &(current()->kernel_esp));
 }
 
 

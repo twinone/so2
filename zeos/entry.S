@@ -162,7 +162,7 @@ ENTRY(task_switch) // @new parameter
 	
 
 
-ENTRY(hacky_asm)
+ENTRY(inner_inner_task_switch)
 	push %ebp
 	mov %esp, %ebp
 
@@ -170,7 +170,6 @@ ENTRY(hacky_asm)
 	mov 12(%ebp), %eax
 	mov %ebp, (%eax)
 
-popebp:
 	pop %ebp
 	ret
  
