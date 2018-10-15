@@ -94,7 +94,7 @@ void setIdt()
 	// init the MSR registers
 	writeMSR(0x174, __KERNEL_CS);
 	writeMSR(0x175, INITIAL_ESP);
-	writeMSR(0x176, syscall_handler_sysenter);
+	writeMSR(0x176, (int)syscall_handler_sysenter);
 
   /* ADD INITIALIZATION CODE FOR INTERRUPT VECTOR */
 

@@ -142,7 +142,7 @@ void init_sched() {
 
 
 void inner_task_switch(union task_union *new) {
-	update_esp(&new->stack[KERNEL_STACK_SIZE]);
+	update_esp((int)&new->stack[KERNEL_STACK_SIZE]);
 	set_cr3(new->task.dir_pages_baseAddr);
 	inner_inner_task_switch(&(new->task.kernel_esp), &(current()->kernel_esp));
 }
@@ -181,6 +181,8 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 	}
 	if (dest == &readyqueue) {
 		t->state = ST_READY;
+	} else if (dest == &freequeue) {
+		t->state = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
 	}
@@ -188,14 +190,14 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 
 
 void sched_next_rr() {
-	if(list_empty(&readyqueue))task_switch(idle_task);
+	if(list_empty(&readyqueue)) task_switch((union task_union *)idle_task);
 	struct list_head *e = list_first(&readyqueue);
 	struct task_struct *t = list_entry(e, struct task_struct, anchor);
 		
 	update_process_state_rr(t, NULL);
 	ticks = 0;
 	
-	task_switch(t);
+	task_switch((union task_union *)t);
 }
 
 

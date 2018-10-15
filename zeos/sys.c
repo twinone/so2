@@ -79,13 +79,7 @@ extern int getebp();
 int ret_from_fork() { return 0; }
 
 
-void printNum(char *text, int num) {
-	char buf2[20];
-	itoa(num, buf2);
-	printk(text);
-	printk(buf2);
-	printk("\n");
-}
+
 
 int sys_fork() {
 	if (list_empty(&freequeue)) return -EAGAIN;
@@ -122,7 +116,7 @@ int sys_fork() {
 	for (int i = 0; i < NUM_PAG_DATA; i++) {
 		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
 		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
-		copy_data((PAG_LOG_INIT_DATA + i)*PAGE_SIZE, (FIRST_FREE_PAGE+i)*PAGE_SIZE, PAGE_SIZE); 
+		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_FREE_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
 		del_ss_pag(curr_PT, FIRST_FREE_PAGE + i);
 		set_cr3(curr_t->dir_pages_baseAddr);
 	}
@@ -133,7 +127,7 @@ int sys_fork() {
 	int new_ebp = ebp_offset + (int)new_t;
 
 	new_u->task.kernel_esp = new_ebp - 1*sizeof(long);
-	new_u->stack[ebp_offset/sizeof(long) - 0] = &ret_from_fork;
+	new_u->stack[ebp_offset/sizeof(long) - 0] = (long)&ret_from_fork;
 	new_u->stack[ebp_offset/sizeof(long) - 1] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 
 	new_t->state = ST_READY;
@@ -143,9 +137,9 @@ int sys_fork() {
 
 void sys_exit() {
 	for (int i = 0; i < NUM_PAG_DATA+NUM_PAG_CODE; i++) 
-		free_frame(current()->dir_pages_baseAddr+i*PAGE_SIZE);
+		free_frame((int)current()->dir_pages_baseAddr+i*PAGE_SIZE);
 	
-	current()->state = ST_ZOMBIE;
+	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
 	printk("program killed");
 }

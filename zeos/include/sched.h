@@ -80,6 +80,6 @@ void sched_next_rr();
 void update_process_state_rr(struct task_struct *t, struct list_head *dest);
 int needs_sched_rr();
 void update_sched_data_rr();
-void run_rr(); // called every clock tick
+void schedule(); // called every clock tick
 
 #endif  /* __SCHED_H__ */
