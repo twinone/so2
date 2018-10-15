@@ -154,15 +154,18 @@ struct task_struct *ts_from_pid(int pid) {
 }
 
 int sys_get_stats(int pid, struct stats* st) {
+	printk("\nenter sys_get_stats\n");
 	struct task_struct *t = ts_from_pid(pid);
 	if (t == NULL) return -1; // INVALID PID
 
-	// we have to check that the user can actually write to that pointer,
+
+	// we have to check that the we can actually write to that pointer,
 	// or we will have a serious security vuln
 	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) return -EACCES;
 	
+	t->stats.user_ticks = 500;
 	copy_to_user(&t->stats, st, sizeof(struct stats));
-
-	return -2; // if we return 0 here everything breaks
+	printk("\nexit sys_get_stats\n");
+	return 0; // if we return 0 here everything breaks, in the teacher's lib
 		
 }

@@ -21,34 +21,31 @@ int __attribute__ ((__section__(".text.main")))
     /* Next line, tries to move value 0 to CR3 register. This register is a privileged one, and so it will raise an exception */
       //__asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); 
 	
-	runjp();
-while(1) {}
+
 
 	w("Hello from userland\n");
-	int p = fork();
-	
-	if (p == 0) {
-		w("  Child going to exit");	
-		
-	} else {
-		w("  Parent");
-		int p2 = fork();
-		
-		if (p2 == 0) {
-			w("   Child 2");		
-		} else {
-			w("  Parent After 2nd child");
-		}
-	}
-		exit();	
 
-	while(1){
-		continue;
-		char buf[4];
-		itoa(p, buf);
-		write(1, buf, strlen(buf));
-		write(1, " ", 1);
+	runjp_rank(0, 14);
+
+	while(1);
+
+	//struct stats st;
+	//get_stats(getpid(), &st);
+	
+	
+
+	for (int i = 0; i < 18; i++) {
+		int p = fork();
+		if (p != 0) exit();
+		
+		writepid();
 	}
+	
+	
+	
+	
+
+	while(1){}
 
 
 	return 0;

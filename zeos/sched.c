@@ -195,6 +195,7 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 		t->state = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
+		t->stats.total_trans++;
 	}
 }
 
