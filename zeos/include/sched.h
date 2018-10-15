@@ -8,6 +8,7 @@
 #include <list.h>
 #include <types.h>
 #include <mm_address.h>
+#include <stats.h>
 #include <THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING.h>
 
 #define NR_TASKS      10
@@ -26,7 +27,7 @@ struct task_struct {
 	struct list_head anchor;
 	int quantum;
 	enum state_t state;
-	
+	struct stats stats;
 };
 
 union task_union {

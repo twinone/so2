@@ -27,12 +27,11 @@ union task_union protected_tasks[NR_TASKS+2]
 
 union task_union *task = &protected_tasks[1]; /* == union task_union task[NR_TASKS] */
 
-#if 0
 struct task_struct *list_head_to_task_struct(struct list_head *l)
 {
-  return list_entry( l, struct task_struct, list);
+  return list_entry( l, struct task_struct, anchor);
 }
-#endif
+
 
 extern struct list_head blocked;
 
@@ -209,6 +208,15 @@ void schedule() {
 		update_process_state_rr(current(), &readyqueue);
 		sched_next_rr();
 	}
+}
+
+
+int get_quantum(struct task_struct *t) {
+	return t->quantum;
+}
+
+void set_quantum(struct task_struct *t, int new_quantum) {
+	t->quantum = new_quantum;
 }
 
 

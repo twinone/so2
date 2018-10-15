@@ -140,3 +140,30 @@ ret5:   pop %ebp
 	pop %ebp
 	ret
 
+ENTRY(get_stats)
+	push %ebp
+	mov %esp, %ebp
+
+	push %ecx // save ecx
+	push %edx // save edx
+	push %ebx // save ebx
+
+	mov 12(%ebp), %ecx   #stats*
+	mov 8(%ebp), %ebx    #pid
+
+	lea ret6, %eax // sysenter return correctly
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $35, %eax
+	sysenter
+ret6:   pop %ebp
+	add $4, %esp
+
+	pop %ebx
+	pop %edx
+	pop %ecx
+
+   	mov %ebp, %esp
+	pop %ebp
+	ret

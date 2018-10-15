@@ -143,3 +143,10 @@ void sys_exit() {
 	sched_next_rr();
 	printk("program killed");
 }
+
+int sys_get_stats(int pid, struct stats* st) {
+	// we have to check that the user can actually write to that pointer,
+	// or we will have a serious security vuln
+	return -5;
+		
+}
