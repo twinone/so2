@@ -24,21 +24,17 @@ int __attribute__ ((__section__(".text.main")))
 
 
 	w("Hello from userland\n");
-
-	runjp_rank(0, 14);
-
+	runjp_rank(0, 9);
 	while(1);
 
-	//struct stats st;
-	//get_stats(getpid(), &st);
-	
-	
-
-	for (int i = 0; i < 18; i++) {
+	for (int i = 0; i < 100; i++) {
 		int p = fork();
-		if (p != 0) exit();
-		
-		writepid();
+
+		if (p == 0) {
+			writepid();
+
+		} else exit();
+
 	}
 	
 	

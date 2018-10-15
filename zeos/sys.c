@@ -83,7 +83,11 @@ int ret_from_fork() { return 0; }
 
 
 int sys_fork() {
-	if (list_empty(&freequeue)) return -EAGAIN;
+	printk("\n sys_fork start\n");
+	if (list_empty(&freequeue)) {
+		printk("\n sys_fork no free process, try again\n");
+		return -EAGAIN;
+	}
 	struct list_head *e = list_first(&freequeue);
 
 	list_del(e);
@@ -111,6 +115,7 @@ int sys_fork() {
 		dataFrames[i] = alloc_frame();
 		if (dataFrames[i] < 0) {
 			for (int j = 0;j < i; j++) free_frame(dataFrames[j]);
+	printk("\n sys_fork ENOMEM\n");
 			return -ENOMEM;
 		}
 	}
@@ -134,17 +139,20 @@ int sys_fork() {
 	init_stats(new_t);
 
 	list_add_tail(&new_t->anchor, &readyqueue);
+	printk("\n sys_fork end\n");
 	return new_t->PID;
 }
 
-void sys_exit() {
-	for (int i = 0; i < NUM_PAG_DATA+NUM_PAG_CODE; i++) 
-		free_frame((int)current()->dir_pages_baseAddr+i*PAGE_SIZE);
-	
+
+void sys_exit()
+{
+	printk("\n sys_exit start\n");
+	free_user_pages(current());
 	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
-	printk("program killed");
+	printk("\n sys_exit end\n");
 }
+
 
 struct task_struct *ts_from_pid(int pid) {
 	for (int i = 0; i < NR_TASKS; i++) {

@@ -62,7 +62,7 @@ int allocate_DIR(struct task_struct *t)
 
 void cpu_idle(void) {
 	__asm__ __volatile__("sti": : :"memory");
-	while(1){printk("i");}
+	while(1){printk("i"); for(int i = 0; i < 1000000; i++){printk("");}}
 }
 
 void init_idle () {
@@ -195,13 +195,17 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 		t->state = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
+			//printk("\ninc total trans\n");
 		t->stats.total_trans++;
 	}
 }
 
 
 void sched_next_rr() {
-	if(list_empty(&readyqueue)) task_switch((union task_union *)idle_task);
+	if (list_empty(&readyqueue)) {
+		task_switch((union task_union *)idle_task);
+		return;
+	}
 	struct list_head *e = list_first(&readyqueue);
 	struct task_struct *t = list_entry(e, struct task_struct, anchor);
 		
