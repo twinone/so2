@@ -142,15 +142,10 @@ int sys_fork() {
 }
 
 void sys_exit() {
-	for(int i=0; i<NUM_PAG_DATA+NUM_PAG_CODE;++i){	//maybe, probably not
-	free_frame(current()->dir_pages_baseAddr+i*PAGE_SIZE);	
-	}
-	//current()->state = ST_READY;
-	list_add_tail(&(current()->anchor), &freequeue);
-		
+	for (int i = 0; i < NUM_PAG_DATA+NUM_PAG_CODE; i++) 
+		free_frame(current()->dir_pages_baseAddr+i*PAGE_SIZE);
 	
-	
-	update_process_state_rr(current(),&freequeue);
+	current()->state = ST_ZOMBIE;
 	sched_next_rr();
 	printk("program killed");
 }
