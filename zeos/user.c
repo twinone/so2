@@ -24,7 +24,8 @@ int __attribute__ ((__section__(".text.main")))
 
 
 	w("Hello from userland\n");
-	//runjp_rank(0, 8); // OK
+	
+//runjp_rank(0, 8); // OK
 	//runjp_rank(9, 13); // OK 9-13 WORK
 	// runjp_rank(9, 14); // OK 9-14 WORK BUT page fault at the END
 	// runjp_rank(14, 14); // OK 14 only, also works (probably bad memory freeing somewhere (where?))
@@ -54,6 +55,19 @@ int __attribute__ ((__section__(".text.main")))
 	// 2  MEDIUM
 	// 5  BAD / ERROR
 
+	/*
+		El scheduling funciona cuando tenemos procesos que escriben su PID, y cuando hacen exit
+		se va al idle correctamente.
+		
+		El fork() funciona (ver fork bomb debajo).
+
+		Muy probablemente tengamos algun memory leak por ahi, o algun fallo en la gestion de listas
+
+		Necesitamos una hora de consulta para estos fallos y ver que tenemos mal con mas detalle.
+
+		Eso si, muy interesante.
+
+	*/
 	
 	
 	while(1);
