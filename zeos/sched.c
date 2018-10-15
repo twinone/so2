@@ -87,6 +87,17 @@ void init_idle () {
 	idle_task->kernel_esp = (int) &u->stack[KERNEL_STACK_SIZE-2];
 }
 
+void init_stats(struct task_struct *t) {
+	t->state = ST_READY;
+	t->stats.user_ticks = 0;
+	t->stats.system_ticks = 0;
+	t->stats.blocked_ticks = 0;
+	t->stats.ready_ticks = 0;
+	t->stats.elapsed_total_ticks = 0;
+	t->stats.total_trans = 0;
+	t->stats.remaining_ticks = DEFAULT_QUANTUM;
+}
+
 void update_esp(int esp) {
   	tss.esp0 = esp;
 	writeMSR(0x175, esp);

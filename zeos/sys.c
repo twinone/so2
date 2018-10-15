@@ -19,6 +19,7 @@
 #include <system.h>
 #include <errno.h>
 
+
 #define LECTURA 0
 #define ESCRIPTURA 1
 
@@ -130,7 +131,8 @@ int sys_fork() {
 	new_u->stack[ebp_offset/sizeof(long) - 0] = (long)&ret_from_fork;
 	new_u->stack[ebp_offset/sizeof(long) - 1] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 
-	new_t->state = ST_READY;
+	init_stats(new_t);
+
 	list_add_tail(&new_t->anchor, &readyqueue);
 	return new_t->PID;
 }
@@ -144,9 +146,23 @@ void sys_exit() {
 	printk("program killed");
 }
 
+struct task_struct *ts_from_pid(int pid) {
+	for (int i = 0; i < NR_TASKS; i++) {
+		if ((&task[i])->task.PID == pid) return (struct task_struct *)&task[i];
+	}
+	return NULL;
+}
+
 int sys_get_stats(int pid, struct stats* st) {
+	struct task_struct *t = ts_from_pid(pid);
+	if (t == NULL) return -1; // INVALID PID
+
 	// we have to check that the user can actually write to that pointer,
 	// or we will have a serious security vuln
-	return -5;
+	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) return -EACCES;
+	
+	copy_to_user(&t->stats, st, sizeof(struct stats));
+
+	return -2; // if we return 0 here everything breaks
 		
 }

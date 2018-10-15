@@ -76,6 +76,8 @@ extern void inner_inner_task_switch();
 
 extern void save_ebp();
 
+void init_stats(struct task_struct *t);
+
 /* Headers for the scheduling policy */
 void sched_next_rr();
 void update_process_state_rr(struct task_struct *t, struct list_head *dest);
