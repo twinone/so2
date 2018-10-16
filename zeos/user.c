@@ -26,11 +26,13 @@ int __attribute__ ((__section__(".text.main")))
 
 //	writepid();
 
-	//int p = fork();
-	
-	//if (p == 0) write(1, "child\n", 6);
-	//else write(1, "parent\n", 7);
-
+	int p = fork();
+	while(1){
+		char buf[4];
+		itoa(getpid(), buf);
+		write(1, buf, strlen(buf));
+		write(1, " ", 1);
+	}
 	while(1) { write(1,"a",0);}
 
 	return 0;

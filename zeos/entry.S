@@ -181,4 +181,3 @@ ENTRY(getebp)
 ENTRY(ret_from_fork)
 	RESTORE_ALL
 	iret
-

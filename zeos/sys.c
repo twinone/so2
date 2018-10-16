@@ -70,6 +70,8 @@ extern int getebp();
 
 extern int ret_from_fork();// { return 0; }
 
+
+
 int sys_fork() {
 	int PID=-1;
 
@@ -87,7 +89,7 @@ int sys_fork() {
 	union task_union *curr_u = (union task_union*) curr_t;
 
 	// b
-	copy_data(curr_u, new_u, KERNEL_STACK_SIZE);
+	copy_data(curr_u, new_u, KERNEL_STACK_SIZE * sizeof(long));
 	// FIXME si peta: Determine whether it is necessary to modify the page table
 	// of the parent to access the child’s system data
 

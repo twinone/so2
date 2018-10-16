@@ -137,7 +137,7 @@ void init_sched() {
 
 
 void inner_task_switch(union task_union *new) {
-	if (new == current()) return;
+	//if (new == current()) return;
 
 	update_esp(&new->stack[KERNEL_STACK_SIZE]);
 	set_cr3(new->task.dir_pages_baseAddr);
