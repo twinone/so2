@@ -134,17 +134,6 @@ void init_sched() {
 
 
 
-// TODO remove
-int esp()
-{
-  int ret_value;
-  
-  __asm__ __volatile__(
-  	"movl %%esp, %0"
-	: "=g" (ret_value)
-  );
-	return ret_value;
-}
 
 void inner_task_switch(union task_union *new) {
 	update_esp(&new->stack[KERNEL_STACK_SIZE]);

@@ -73,7 +73,7 @@ extern int ret_from_fork();// { return 0; }
 
 
 int sys_fork() {
-	int PID=-1;
+	int PID=5;
 
 	// a
 	if (list_empty(&freequeue)) return -1; // NO FREE PROCESS

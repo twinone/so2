@@ -165,7 +165,6 @@ ENTRY(task_switch) // @new parameter
 
 
 ENTRY(inner_inner_task_switch)
-testlabel:
 	push %ebp 
 	mov %esp, %ebp
 	
@@ -184,12 +183,6 @@ testlabel:
 ENTRY(getebp)
 	mov %ebp, %eax
 	ret
-
-/*
-ebp = 0x16f80
-esp = 0x16f64
-
-*/
 
 ENTRY(ret_from_fork)
 	RESTORE_ALL
