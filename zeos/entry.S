@@ -90,7 +90,7 @@ ENTRY(system_call_handler)
 err:    movl $-ENOSYS, %EAX
 fin:	movl %EAX, 24(%esp)
 	RESTORE_ALL
-	sysexit
+	iret
 
 
 
@@ -165,6 +165,7 @@ ENTRY(task_switch) // @new parameter
 
 
 ENTRY(inner_inner_task_switch)
+z:
 	push %ebp 
 	mov %esp, %ebp
 	
@@ -185,5 +186,6 @@ ENTRY(getebp)
 	ret
 
 ENTRY(ret_from_fork)
+rff:
 	RESTORE_ALL
-	iret
+	sysexit

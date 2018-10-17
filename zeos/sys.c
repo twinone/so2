@@ -68,13 +68,34 @@ int sys_getpid() {
 
 extern int getebp();
 
+int getebp2()
+{
+  int ret_value;
+  
+  __asm__ __volatile__(
+  	"movl %%ebp, %0"
+	: "=g" (ret_value)
+  );
+  return ret_value;
+}
+
+
 extern int ret_from_fork();// { return 0; }
 
 
+void printNum(char *text, int num) {
+	char buf2[20];
+	itoa(num, buf2);
+	printk(text);
+	printk(buf2);
+	printk("\n");
+}
+
 
 int sys_fork() {
-	int PID=5;
 
+	int PID=5;
+	
 	// a
 	if (list_empty(&freequeue)) return -1; // NO FREE PROCESS
 	struct list_head *e = list_first(&freequeue);
@@ -90,9 +111,6 @@ int sys_fork() {
 
 	// b
 	copy_data(curr_u, new_u, KERNEL_STACK_SIZE * sizeof(long));
-	// FIXME si peta: Determine whether it is necessary to modify the page table
-	// of the parent to access the child’s system data
-
 
 	// c
 	allocate_DIR(new_t);
@@ -156,15 +174,24 @@ int sys_fork() {
 	// eax = 0 in the child
 	new_u->stack[KERNEL_STACK_SIZE-5] = 0; // return 0 to child
 
+
+	
+	
+
 	int ebp_offset = getebp() & 0xfff;
-	int new_ebp = ebp_offset + new_t;
+	int new_ebp = ebp_offset + (int)new_t;
 
+/*
+printNum("EBP: ", getebp());
 
-	new_u->stack[ebp_offset+8] = 0;
-	new_u->task.kernel_esp = &new_u->stack[ebp_offset];
-	new_u->stack[ebp_offset+1] = &ret_from_fork;
+printNum("newt ", new_t);
+printNum("offset ", ebp_offset);
+printNum("newebp ", new_ebp);
+*/
 
-
+	new_u->stack[ebp_offset/sizeof(long)] = 0;
+	new_u->task.kernel_esp = new_ebp;
+	new_u->stack[(ebp_offset+4)/sizeof(long)] = &ret_from_fork;
 
 	// h
 	
@@ -172,6 +199,7 @@ int sys_fork() {
 	list_add_tail(&new_t->anchor, &readyqueue);
 
 	// j
+	
 	return PID;
 }
 

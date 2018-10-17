@@ -127,7 +127,6 @@ void init_sched() {
 	for (int i = 0; i < NR_TASKS; i++) {
 		struct task_struct *el = &task[i];
 		el->PID = i;
-		//el->kernel_esp = el+KERNEL_STACK_SIZE-2;
 		list_add_tail(&(el->anchor), &freequeue);
 	}
 }

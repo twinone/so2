@@ -86,7 +86,7 @@ void setIdt()
   // Add our keyboard_handler to the IDT at position 33
   setInterruptHandler(33, keyboard_handler, 0);
   // add the syscall handler
-  setTrapHandler(0x80, system_call_handler, 3);
+//  setTrapHandler(0x80, system_call_handler, 3);
   // add clock interrupt handler
   setInterruptHandler(32, clock_handler, 0);
 

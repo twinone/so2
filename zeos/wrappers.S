@@ -89,8 +89,6 @@ ret3:   pop %ebp
 	pop %ebp
 	ret
 
-
-
 ENTRY(fork)
 	push %ebp
 	mov %esp, %ebp
@@ -104,6 +102,7 @@ ENTRY(fork)
 	push %ebp // fake dynamic link
 	movl %esp, %ebp
 	mov $2, %eax
+ent4:
 	sysenter
 ret4:   pop %ebp
 	add $4, %esp
