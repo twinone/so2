@@ -28,12 +28,13 @@ int __attribute__ ((__section__(".text.main")))
 
 	int p = fork();
 	while(1){
+	
 		char buf[4];
-		itoa(getpid(), buf);
-		write(1, buf, strlen(buf));
-		write(1, " ", 1);
+		//itoa(getpid(), buf);
+		//write(1, buf, strlen(buf));
+		write(1, "u", 1);
 	}
-	while(1) { write(1,"a",0);}
+
 
 	return 0;
 }

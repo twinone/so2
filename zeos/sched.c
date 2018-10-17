@@ -60,7 +60,7 @@ int allocate_DIR(struct task_struct *t)
 
 void cpu_idle(void) {
 	__asm__ __volatile__("sti": : :"memory");
-	while(1){printk("");}
+	while(1){printk("i");}
 }
 
 void init_idle () {
@@ -134,14 +134,22 @@ void init_sched() {
 
 
 
-
+// TODO remove
+int esp()
+{
+  int ret_value;
+  
+  __asm__ __volatile__(
+  	"movl %%esp, %0"
+	: "=g" (ret_value)
+  );
+	return ret_value;
+}
 
 void inner_task_switch(union task_union *new) {
-	//if (new == current()) return;
-
 	update_esp(&new->stack[KERNEL_STACK_SIZE]);
 	set_cr3(new->task.dir_pages_baseAddr);
-	inner_inner_task_switch(new->task.kernel_esp, &(current()->kernel_esp));
+	inner_inner_task_switch(&(new->task.kernel_esp), &(current()->kernel_esp));
 }
 
 
