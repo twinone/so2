@@ -188,6 +188,7 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 
 
 void sched_next_rr() {
+	if(list_empty(&readyqueue))task_switch(idle_task);
 	struct list_head *e = list_first(&readyqueue);
 	struct task_struct *t = list_entry(e, struct task_struct, anchor);
 		

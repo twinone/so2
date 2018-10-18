@@ -26,7 +26,8 @@ int __attribute__ ((__section__(".text.main")))
 	int p = fork();
 	
 	if (p == 0) {
-		w("  Child");		
+		w("  Child going to exit");	
+		
 	} else {
 		w("  Parent");
 		int p2 = fork();
@@ -37,6 +38,7 @@ int __attribute__ ((__section__(".text.main")))
 			w("  Parent After 2nd child");
 		}
 	}
+		exit();	
 
 	while(1){
 		continue;
