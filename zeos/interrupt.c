@@ -7,6 +7,7 @@
 #include <hardware.h>
 #include <io.h>
 #include <system.h>
+#include <sched.h>
 
 #include <zeos_interrupt.h>
 
@@ -113,23 +114,16 @@ void keyboard_routine() {
         // < 32 are non printable ascii
 	if (key < 32) printc_xy(0, 0, 'C');		
 	else printc_xy(0,0,key);
-
-
-	// Very very ugly task switching
-	if (key == '0') task_switch(&task[0]);
-	if (key == '1') task_switch(&task[1]);
-	if (key == '2') task_switch(&task[2]);
 }
 
 
 
 
 void clock_routine() {
-    zeos_ticks++;
-    zeos_show_clock();
+	zeos_ticks++;
+	zeos_show_clock();
 
-
-
+	run_rr();
 }
 
 

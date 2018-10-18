@@ -22,6 +22,7 @@ int __attribute__ ((__section__(".text.main")))
 
 	int p = fork();
 	while(1){
+
 		char buf[4];
 		itoa(p, buf);
 		write(1, buf, strlen(buf));

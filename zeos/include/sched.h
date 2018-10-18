@@ -8,21 +8,25 @@
 #include <list.h>
 #include <types.h>
 #include <mm_address.h>
+#include <THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING.h>
 
 #define NR_TASKS      10
 #define KERNEL_STACK_SIZE	1024
+#define DEFAULT_QUANTUM THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING
 
 
-
-enum state_t { ST_RUN, ST_READY, ST_BLOCKED };
+enum state_t { ST_RUN, ST_READY, ST_BLOCKED, ST_ZOMBIE };
 
 struct task_struct {
 	// THIS STRUCTURE HAS ITS FIELDS ACCESSED IN ASSEMBLY
 	// ALWAYS ADD NEW FIELDS TO THE END OF THIS STRUCTURE AND NEVER REMOVE ANYTHING
-  int PID; // used in asm
-  page_table_entry *dir_pages_baseAddr; // used in asm
-  int kernel_esp; // used in asm
-  struct list_head anchor;
+	int PID; // used in asm
+	page_table_entry *dir_pages_baseAddr; // used in asm
+	int kernel_esp; // used in asm
+	struct list_head anchor;
+	int quantum;
+	enum state_t state;
+	
 };
 
 union task_union {
@@ -76,5 +80,6 @@ void sched_next_rr();
 void update_process_state_rr(struct task_struct *t, struct list_head *dest);
 int needs_sched_rr();
 void update_sched_data_rr();
+void run_rr(); // called every clock tick
 
 #endif  /* __SCHED_H__ */

@@ -14,6 +14,8 @@ struct task_struct *idle_task;
 struct list_head freequeue;
 struct list_head readyqueue;
 
+int ticks = 0;
+
 
 
 /**
@@ -80,17 +82,16 @@ void init_idle () {
 	// we need to set %esp to &task[1] and push @cpu_idle, push 42 so that task_switch can
 	// undo this fake dynamic link
 	union task_union *u = (union task_union *) idle_task;
-	u->stack[KERNEL_STACK_SIZE-1] = &cpu_idle;
+	u->stack[KERNEL_STACK_SIZE-1] = (long) &cpu_idle;
 	u->stack[KERNEL_STACK_SIZE-2] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	
-	idle_task->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
+	idle_task->kernel_esp = (int) &u->stack[KERNEL_STACK_SIZE-2];
 }
 
 void update_esp(int esp) {
   	tss.esp0 = esp;
 	writeMSR(0x175, esp);
 }
-
 
 
 void init_task1() {
@@ -100,6 +101,7 @@ void init_task1() {
 	struct task_struct *t = list_entry(e, struct task_struct, anchor);
 	
 	t->PID = 1;
+	t->state = ST_RUN;
 	allocate_DIR(t);
 	set_user_pages(t);
 
@@ -110,7 +112,7 @@ void init_task1() {
 	
 	
 	// 4
-	update_esp(&u->stack[KERNEL_STACK_SIZE]);
+	update_esp((int) &u->stack[KERNEL_STACK_SIZE]);
 
 
 	// 5
@@ -126,9 +128,13 @@ void init_sched() {
 
 
 	for (int i = 0; i < NR_TASKS; i++) {
-		struct task_struct *el = &task[i];
-		el->PID = i;
-		list_add_tail(&(el->anchor), &freequeue);
+		struct task_struct *el = (struct task_struct *) &task[i];
+
+		el->PID = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING +i;
+		el->quantum = DEFAULT_QUANTUM;
+		el->state = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
+
+		list_add_tail(&el->anchor, &freequeue);
 	}
 }
 
@@ -153,4 +159,55 @@ struct task_struct* current()
   );
   return (struct task_struct*)(ret_value&0xfffff000);
 }
+
+
+/* Round robin policy implementation */
+
+
+int needs_sched_rr() {
+	return current()->quantum <= ticks;
+}
+
+void update_sched_data_rr() {
+	ticks++;
+}
+
+void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+	if (t->state != ST_RUN) {
+		list_del(&t->anchor);
+	}
+	if (dest != NULL) {
+		list_add_tail(&t->anchor, dest);
+	}
+	if (dest == &readyqueue) {
+		t->state = ST_READY;
+	} else if (dest == NULL) {
+		t->state = ST_RUN;
+	}
+}
+
+
+void sched_next_rr() {
+	struct list_head *e = list_first(&readyqueue);
+	struct task_struct *t = list_entry(e, struct task_struct, anchor);
+		
+	update_process_state_rr(t, NULL);
+	ticks = 0;
+	
+	task_switch(t);
+}
+
+
+void run_rr() {
+	update_sched_data_rr();
+	if (needs_sched_rr()) {
+		if (list_empty(&readyqueue)) return;
+		
+		update_process_state_rr(current(), &readyqueue);
+		sched_next_rr();
+	}
+}
+
+
+
 

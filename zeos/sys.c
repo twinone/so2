@@ -90,6 +90,7 @@ void printNum(char *text, int num) {
 int sys_fork() {
 	if (list_empty(&freequeue)) return -EAGAIN;
 	struct list_head *e = list_first(&freequeue);
+
 	list_del(e);
 
 	struct task_struct *new_t = list_entry(e, struct task_struct, anchor);
@@ -135,7 +136,7 @@ int sys_fork() {
 	new_u->stack[ebp_offset/sizeof(long) - 0] = &ret_from_fork;
 	new_u->stack[ebp_offset/sizeof(long) - 1] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 
-
+	new_t->state = ST_READY;
 	list_add_tail(&new_t->anchor, &readyqueue);
 	return new_t->PID;
 }
