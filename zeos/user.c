@@ -1,9 +1,5 @@
 #include <libc.h>
 
-
-
-int pid;
-
 void writepid() {
 	int pid = getpid();
 	char buf[5];
@@ -24,11 +20,8 @@ int __attribute__ ((__section__(".text.main")))
 	char *str = "Hello from userland\n";
 	write(1, str, strlen(str));
 
-//	writepid();
-
 	int p = fork();
 	while(1){
-	continue;
 		char buf[4];
 		itoa(p, buf);
 		write(1, buf, strlen(buf));

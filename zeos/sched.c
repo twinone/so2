@@ -2,6 +2,7 @@
  * sched.c - initializes struct for task 0 and task 1
  */
 
+#include <THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING.h>
 #include <sched.h>
 #include <mm.h>
 #include <io.h>
@@ -80,7 +81,7 @@ void init_idle () {
 	// undo this fake dynamic link
 	union task_union *u = (union task_union *) idle_task;
 	u->stack[KERNEL_STACK_SIZE-1] = &cpu_idle;
-	u->stack[KERNEL_STACK_SIZE-2] = 42;
+	u->stack[KERNEL_STACK_SIZE-2] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	
 	idle_task->kernel_esp = &u->stack[KERNEL_STACK_SIZE-2];
 }

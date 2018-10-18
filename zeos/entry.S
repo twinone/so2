@@ -165,7 +165,6 @@ ENTRY(task_switch) // @new parameter
 
 
 ENTRY(inner_inner_task_switch)
-z:
 	push %ebp 
 	mov %esp, %ebp
 	
@@ -185,7 +184,6 @@ ENTRY(getebp)
 	mov %ebp, %eax
 	ret
 
-ENTRY(ret_from_fork)
-rff:
+ENTRY(ret_from_fork4)
 	RESTORE_ALL
 	sysexit
