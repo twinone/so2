@@ -118,7 +118,7 @@ int sys_fork() {
 			return -ENOMEM;
 		}
 	}
-	for (int i = 0;i < NUM_PAG_DATA; i++) {		
+	for (int i = 0; i < NUM_PAG_DATA; i++) {
 		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
 		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
 		copy_data((PAG_LOG_INIT_DATA + i)*PAGE_SIZE, (FIRST_FREE_PAGE+i)*PAGE_SIZE, PAGE_SIZE); 

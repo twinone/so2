@@ -28,7 +28,6 @@ struct task_struct {
 union task_union {
   struct task_struct task;
   unsigned long stack[KERNEL_STACK_SIZE];    /* pila de sistema, per procés */
-  //char mem[KERNEL_STACK_SIZE * sizeof(unsigned long)] /* pila del sistema, en unitats del sistema internacional */
 };
 
 extern union task_union protected_tasks[NR_TASKS+2];
