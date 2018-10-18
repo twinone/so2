@@ -198,7 +198,7 @@ void sched_next_rr() {
 }
 
 
-void run_rr() {
+void schedule() {
 	update_sched_data_rr();
 	if (needs_sched_rr()) {
 		if (list_empty(&readyqueue)) return;
