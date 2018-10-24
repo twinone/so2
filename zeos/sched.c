@@ -221,9 +221,13 @@ void sched_next_rr() {
 void schedule() {
 	update_sched_data_rr();
 	if (needs_sched_rr()) {
-		if (list_empty(&readyqueue)) return;
-		
+		// update the process state before checking the ready queue
+		// otherwise if there's a single process we will go to idle task
+		// once it's quantum is over
+		// this way we add it to the ready queue first, and execute it.
 		update_process_state_rr(current(), &readyqueue);
+		// we check for empty ready queue inside sched_next_rr because 
+		// exit() uses it directly
 		sched_next_rr();
 	}
 }
