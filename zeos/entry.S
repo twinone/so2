@@ -169,7 +169,7 @@ ENTRY(inner_inner_task_switch)
 	mov %esp, %ebp
 	
 	mov 12(%ebp), %eax
-	mov %esp, (%eax)
+	mov %ebp, (%eax)
 	
 	mov 8(%ebp), %eax
 	mov (%eax), %esp
