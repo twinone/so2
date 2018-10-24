@@ -192,11 +192,13 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 	if (dest == &readyqueue) {
 		t->state = ST_READY;
 	} else if (dest == &freequeue) {
-		t->state = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
+		t->state = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
 			//printk("\ninc total trans\n");
 		t->stats.total_trans++;
+	} else { // unknown list (blocked queue for example)
+		t->state = ST_READY; // don't use blocked yet
 	}
 }
 
