@@ -27,7 +27,6 @@ ret:    pop %ebp
 	mov %eax, (%ebx)
 	mov $-1, %eax // return -1
 	jmp end
-
 end_err:mov 16(%ebp), %eax // if write succeeds, the written bytes are equal to the size parameter
 end:    
 	pop %ebx
@@ -82,14 +81,24 @@ ENTRY(fork)
 	push %ebp // fake dynamic link
 	movl %esp, %ebp
 	mov $2, %eax
-ent4:
 	sysenter
-ret4:   pop %ebp
-	add $4, %esp
-
-   	mov %ebp, %esp
+ret4:	pop %ebp
+	add $4, %esp // remove the lea
+	cmp $0, %eax // check return value of the implementation
+	jge end4 // if 0, leave it as is, the syscall succeeded
+	// if syscall fails, store the reason in errno
+	lea errno, %ebx
+	mov %eax, (%ebx)
+	mov $-1, %eax // return -1
+end4:    
+	mov %ebp, %esp
 	pop %ebp
 	ret
+
+
+
+
+
 
 ENTRY(exit)
 	push %ebp
