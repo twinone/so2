@@ -43,10 +43,6 @@ ENTRY(gettime)
 	push %ebp
 	mov %esp, %ebp
 
-	push %ecx // save ecx
-	push %edx // save edx
-	push %ebx // save ebx
-
 	lea ret2, %eax // sysenter return correctly
 	push %eax
 	push %ebp // fake dynamic link
@@ -56,10 +52,6 @@ ENTRY(gettime)
 ret2:   pop %ebp
 	add $4, %esp
 
-	pop %ebx
-	pop %edx
-	pop %ecx
-
    	mov %ebp, %esp
 	pop %ebp
 	ret
@@ -67,10 +59,6 @@ ret2:   pop %ebp
 ENTRY(getpid)
 	push %ebp
 	mov %esp, %ebp
-
-	push %ecx // save ecx
-	push %edx // save edx
-	push %ebx // save ebx
 
 	lea ret3, %eax // sysenter return correctly
 	push %eax
@@ -81,10 +69,6 @@ ENTRY(getpid)
 ret3:   pop %ebp
 	add $4, %esp
 
-	pop %ebx
-	pop %edx
-	pop %ecx
-
    	mov %ebp, %esp
 	pop %ebp
 	ret
@@ -92,10 +76,6 @@ ret3:   pop %ebp
 ENTRY(fork)
 	push %ebp
 	mov %esp, %ebp
-
-	push %ecx // save ecx
-	push %edx // save edx
-	push %ebx // save ebx
 
 	lea ret4, %eax // sysenter return correctly
 	push %eax
@@ -107,10 +87,6 @@ ent4:
 ret4:   pop %ebp
 	add $4, %esp
 
-	pop %ebx
-	pop %edx
-	pop %ecx
-
    	mov %ebp, %esp
 	pop %ebp
 	ret
@@ -118,10 +94,6 @@ ret4:   pop %ebp
 ENTRY(exit)
 	push %ebp
 	mov %esp, %ebp
-
-	push %ecx // save ecx
-	push %edx // save edx
-	push %ebx // save ebx
 
 	lea ret5, %eax // sysenter return correctly
 	push %eax
@@ -132,10 +104,6 @@ ENTRY(exit)
 ret5:   pop %ebp
 	add $4, %esp
 
-	pop %ebx
-	pop %edx
-	pop %ecx
-
    	mov %ebp, %esp
 	pop %ebp
 	ret
@@ -145,7 +113,6 @@ ENTRY(get_stats)
 	mov %esp, %ebp
 
 	push %ecx // save ecx
-	push %edx // save edx
 	push %ebx // save ebx
 
 	mov 12(%ebp), %ecx #stats*
@@ -161,8 +128,8 @@ ENTRY(get_stats)
 	add $4, %esp
 
 	pop %ebx
-	pop %edx
 	pop %ecx
+
 
 	mov %ebp, %esp
 	pop %ebp
