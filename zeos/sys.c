@@ -124,8 +124,8 @@ int sys_fork() {
 		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
 		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_FREE_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
 		del_ss_pag(curr_PT, FIRST_FREE_PAGE + i);
-		set_cr3(curr_t->dir_pages_baseAddr);
 	}
+	set_cr3(curr_t->dir_pages_baseAddr);
 
 	new_t->PID = nextPID++;
 
