@@ -292,7 +292,7 @@ int sys_sem_wait(int id) {
 	} else {
 		update_process_state_rr(current(), &s->procs);
 		sched_next_rr();
-		return sem_from_id(id) == NULL ? -1 : 0; 	
+		return current()->sem_destroyed == 1 ? -1 : 0;
 	}
 
 	return 0;
