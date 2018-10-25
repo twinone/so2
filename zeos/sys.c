@@ -264,8 +264,9 @@ struct semaphore *get_free_sem() {
 }
 
 int sys_sem_init(int id, unsigned int value) {
-	if (id < 0) return -1; // invalid id
-	if (sem_from_id(id) != NULL) return -1; // already used
+	if (id < 0) return -EINVAL; // invalid id
+	if (id >= NR_SEMAPHORES) return -EINVAL;
+	if (sem_from_id(id) != NULL) return -EBUSY; // already used
 	
 	struct semaphore *s = get_free_sem();
 	if (s == NULL) return -1; // no free semaphores
@@ -281,9 +282,9 @@ int sys_sem_init(int id, unsigned int value) {
 }
 
 int sys_sem_wait(int id) {
-	if (id < 0) return -1; // invalid id
+	if (id < 0) return -EINVAL; // invalid id
 	struct semaphore *s = sem_from_id(id);
-	if (s == NULL) return -1; // invalid sem
+	if (s == NULL) return -EINVAL; // invalid sem
 
 	
 	if (s->value > 0) {
@@ -298,9 +299,9 @@ int sys_sem_wait(int id) {
 }
 
 int sys_sem_signal(int id) {
-	if (id < 0) return -1; // invalid id
+	if (id < 0) return -EINVAL; // invalid id
 	struct semaphore *s = sem_from_id(id);
-	if (s == NULL) return -1; // invalid sem
+	if (s == NULL) return -EINVAL; // invalid sem
 
 	if (list_empty(&s->procs)) {
 		s->value++;
@@ -314,9 +315,9 @@ int sys_sem_signal(int id) {
 }
 
 int sys_sem_destroy(int id) {
-	if (id < 0) return -1; // invalid id
+	if (id < 0) return -EINVAL; // invalid id
 	struct semaphore *s = sem_from_id(id);
-	if (s == NULL) return -1; // invalid sem
+	if (s == NULL) return -EINVAL; // invalid sem
 	if (s->owner != current()->PID) return -1; // not owner
 	
 	while (!list_empty(&s->procs)) {

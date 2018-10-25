@@ -185,7 +185,7 @@ ret6:	pop %ebp
 	// if syscall fails, store the reason in errno
 	lea errno, %ebx
 
-	// invert syscall
+	// invert return value
 	not %eax
 	add $1, %eax
 
@@ -258,6 +258,8 @@ ret_sem:
 	cmp $0, %eax
 	je end_sem
 	lea errno, %ebx
+	not %eax
+	add $1, %eax
 	mov %eax, (%ebx)
 	mov $-1, %eax
 end_sem:
@@ -266,5 +268,4 @@ end_sem:
 	mov %ebp, %esp
 	pop %ebp
 	ret
-
 
