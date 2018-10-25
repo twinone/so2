@@ -30,6 +30,7 @@ struct task_struct {
 	enum state_t state;
 	struct stats stats;
 	int dirPos; // position of the page table entry, set by allocate_DIR
+	int sem_destroyed;
 };
 
 union task_union {

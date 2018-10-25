@@ -37,20 +37,29 @@ int __attribute__ ((__section__(".text.main")))
       //__asm__ __volatile__ ("mov %0, %%cr3"::"r" (0) ); 
 	
 	w("Hello from userland\n");
+	runjp();
 
-	int tid = test_clone();
-	if (tid == -1) {
-		w("err clone\n");
-	} else {
-		w("soy er papi\n");
-	}
+	while(1);
 
+	int ret = sem_init(0, 0);
+	if (ret == 0) w("ret ok\n");
+	else w("ret not ok \n");
+
+	sem_destroy(0);
+
+	ret = sem_init(0, 0);
+	if (ret == 0) w("ret ok\n");
+	else w("ret not ok \n");
+	
 	int pid = fork();
 	if (pid == 0) {
-		w("hijo\n");
+		w("hijo before\n");
+		sem_signal(42);
+		w("hijo after\n");
 	} else {
-		w("padre, exit\n");
-		exit();
+		w("padre before\n");
+		sem_wait(42);
+		w("padre after\n");
 	}
 
 	

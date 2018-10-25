@@ -98,6 +98,15 @@ extern int getebp();
 int ret_from_fork() { return 0; }
 
 int sys_clone(void (*ret_from_clone)(), void *stack) {
+
+	if (!access_ok(VERIFY_READ, ret_from_clone, 1)) {
+		return -EFAULT;
+	}
+
+	if (!access_ok(VERIFY_WRITE, stack, 1)) {
+		return -EFAULT;
+	}
+
 	//printk("\n sys_clone start\n");
 	if (list_empty(&freequeue)) {
 		printk("\n sys_fork no free process, try again\n");
@@ -201,17 +210,6 @@ int sys_fork() {
 }
 
 
-void sys_exit()
-{
-	//printk("\n sys_exit start\n");
-	free_user_pages(current());
-	update_process_state_rr(current(), &freequeue);
-	current()->PID = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
-
-	sched_next_rr();
-	printk("\n u fucked up\n");	//execution never reaches here
-
-}
 
 struct task_struct *ts_from_pid(int pid) {
 	for (int i = 0; i < NR_TASKS; i++) {
@@ -230,7 +228,6 @@ int sys_get_stats(int pid, struct stats* st) {
 	if (t == NULL) return -ESRCH;
 	
 	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) {
-		printk("ok\n");
 		return -EFAULT;
 
 	}
@@ -277,6 +274,7 @@ int sys_sem_init(int id, unsigned int value) {
 	s->value = value;
 	s->owner = current()->PID;
 
+
 	INIT_LIST_HEAD(&s->procs);
 
 	return 0;
@@ -309,6 +307,7 @@ int sys_sem_signal(int id) {
 	} else {
 		struct task_struct *t = list_head_to_task_struct(list_first(&s->procs));
 		update_process_state_rr(t, &readyqueue);
+		if (t->sem_destroyed) return -1;
 	}
 
 	return 0;
@@ -323,11 +322,29 @@ int sys_sem_destroy(int id) {
 	while (!list_empty(&s->procs)) {
 		struct task_struct *t = list_head_to_task_struct(list_first(&s->procs));
 		update_process_state_rr(t, &readyqueue);
+		t->sem_destroyed = 1;
 	}
 
+	s->id = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	return 0;
 }
 
+
+void sys_exit()
+{
+	free_user_pages(current());
+	update_process_state_rr(current(), &freequeue);
+
+	// release any semaphores owned by this process
+	for (int i = 0; i < NR_SEMAPHORES; i++)
+		if (semaphores[i].owner == current()->PID)
+			sys_sem_destroy(semaphores[i].id);
+
+	current()->PID = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
+	sched_next_rr();
+	printk("\n u fucked up\n");	//execution never reaches here
+
+}
 
 
 
