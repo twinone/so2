@@ -133,7 +133,8 @@ ENTRY(get_stats)
 	movl %esp, %ebp
 	mov $35, %eax
 	sysenter
-	ret6: pop %ebp
+ret6:	
+	/*pop %ebp
 	add $4, %esp
 
 	pop %ebx
@@ -141,7 +142,7 @@ ENTRY(get_stats)
 
 
 	mov %ebp, %esp
-	pop %ebp
+	pop %ebp*/ //done it in end_stat
 
 
 	cmp $0, %eax // check return value of the implementation
@@ -151,9 +152,8 @@ ENTRY(get_stats)
 	mov %eax, (%ebx)
 	mov $-1, %eax // return -1
 
-	end_stat:
+end_stat:
 	pop %ebx
-	pop %edx
 	pop %ecx
 
 	mov %ebp, %esp

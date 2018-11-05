@@ -7,6 +7,7 @@
 #include <mm.h>
 #include <io.h>
 #include <libc.h>
+#include <utils.h>
 
 
 struct task_struct *idle_task;
@@ -179,17 +180,41 @@ int needs_sched_rr() {
 }
 
 void update_sched_data_rr() {
+	current()->stats.remaining_ticks--;
 	ticks++;
 }
 
 void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+	if(t->state == ST_BLOCKED){
+	
+	t->stats.blocked_ticks += get_ticks() - t->stats.elapsed_total_ticks;;
+
+	}
 	if (t->state != ST_RUN) {
+		if(t->state == ST_BLOCKED){ //comes from state blocked
+		unsigned long total_ticks= get_ticks();
+		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
+		t->stats.elapsed_total_ticks=total_ticks;
+
+		}
+		else{ ///comes from state ready
+		unsigned long total_ticks= get_ticks();
+		t->stats.ready_ticks += get_ticks() - t->stats.elapsed_total_ticks;
+		t->stats.elapsed_total_ticks=total_ticks;
+
+		}
+
 		list_del(&t->anchor);
 	}
 	if (dest != NULL) {
 		list_add_tail(&t->anchor, dest);
 	}
 	if (dest == &readyqueue) {
+		//stats
+		
+
+		//end stats
+
 		t->state = ST_READY;
 	} else if (dest == &freequeue) {
 		t->state = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
@@ -213,6 +238,8 @@ void sched_next_rr() {
 		
 	update_process_state_rr(t, NULL);
 	ticks = 0;
+	t->stats.remaining_ticks = t->quantum;
+	t->stats.total_trans++;
 	
 	task_switch((union task_union *)t);
 }

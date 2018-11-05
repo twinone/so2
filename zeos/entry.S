@@ -74,7 +74,13 @@
 ENTRY(keyboard_handler)
 	SAVE_ALL
 	EOI
+
+	call update_user_ticks ////**////
+
 	call keyboard_routine
+
+	call update_sys_ticks ////**////
+
 	RESTORE_ALL
 	iret
 
@@ -85,7 +91,17 @@ ENTRY(system_call_handler)
 	jl err
 	cmpl $MAX_SYSCALL, %EAX
 	jg err
+
+	push %eax
+	call update_user_ticks ////**////
+	pop %eax
+
 	call *sys_call_table(, %EAX, 0x04)
+
+	push %eax
+	call update_sys_ticks ////**////
+	pop %eax
+
 	jmp fin
 err:    movl $-ENOSYS, %EAX
 fin:	movl %EAX, 24(%esp)
@@ -118,6 +134,7 @@ ENTRY(syscall_handler_sysenter)
 	// User stack address
 	pushfl
 	push $__USER_CS
+
 	push 4(%EBP)
 	// User return address
 	SAVE_ALL
@@ -125,7 +142,17 @@ ENTRY(syscall_handler_sysenter)
 	jl sysenter_err
 	cmpl $MAX_SYSCALL, %EAX
 	jg sysenter_err
+	
+	push %eax
+	call update_user_ticks ////**////
+	pop %eax
+
 	call *sys_call_table(, %EAX, 0x04)
+
+	push %eax
+	call update_sys_ticks ////**////
+	pop %eax
+
 	jmp sysenter_fin
 sysenter_err:
 	movl $-ENOSYS, %EAX

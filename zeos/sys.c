@@ -43,6 +43,33 @@ int sys_ni_syscall()
 
 
 #define BLOCK_SIZE 4
+
+
+
+void update_sys_ticks(){
+
+	struct task_struct *t = current();
+	int total_ticks= get_ticks();
+	t->stats.system_ticks += total_ticks - current()->stats.elapsed_total_ticks;
+	t->stats.elapsed_total_ticks=total_ticks;
+
+}
+
+void update_user_ticks(){
+
+	struct task_struct *t= current();
+	int total_ticks= get_ticks();
+	t->stats.user_ticks += total_ticks - t->stats.elapsed_total_ticks;
+	t->stats.elapsed_total_ticks = total_ticks;
+
+}
+
+
+
+
+
+
+
 int sys_write(int fd, char *buf, int size) {
 	int e = check_fd(fd, ESCRIPTURA);
 
@@ -150,7 +177,7 @@ void sys_exit()
 	free_user_pages(current());
 	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
-	printk("\n sys_exit end\n");
+	printk("\n sys_exit end\n");	//execution never reaches here
 }
 
 
@@ -161,19 +188,46 @@ struct task_struct *ts_from_pid(int pid) {
 	return NULL;
 }
 
+
+
 int sys_get_stats(int pid, struct stats* st) {
 	printk("\nenter sys_get_stats\n");
 	struct task_struct *t = ts_from_pid(pid);
 	if (t == NULL) return -1; // INVALID PID
+	
+	if(t->state == ST_READY){ //update process t stats on a ready process
+	int total_ticks = get_ticks();
+	t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;;
+	t->stats.elapsed_total_ticks = total_ticks;
 
+	}
+
+	if(t->state == ST_READY){ //update process t stats on a blocked process
+	int total_ticks = get_ticks();
+	t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
+	t->stats.elapsed_total_ticks = total_ticks;
+
+	}	
 
 	// we have to check that the we can actually write to that pointer,
 	// or we will have a serious security vuln
 	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) return -EACCES;
 	
-	t->stats.user_ticks = 500;
+	t->stats.user_ticks = 500;//*delete*//
 	copy_to_user(&t->stats, st, sizeof(struct stats));
 	printk("\nexit sys_get_stats\n");
-	return 0; // if we return 0 here everything breaks, in the teacher's lib
+	return 1; // if we return 0 here everything breaks, in the teacher's lib
 		
 }
+
+
+
+
+
+
+
+
+
+
+
+
