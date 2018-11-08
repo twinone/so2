@@ -112,7 +112,7 @@ ENTRY(clone)
 	push %eax
 	push %ebp // fake dynamic link
 	movl %esp, %ebp
-	mov $2, %eax
+	mov $19, %eax
 	sysenter
 ret42:	pop %ebp
 	add $4, %esp // remove the lea

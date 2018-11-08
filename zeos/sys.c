@@ -46,29 +46,19 @@ int sys_ni_syscall()
 
 
 
-void update_sys_ticks(){
-
+void update_sys_ticks() {
 	struct task_struct *t = current();
 	int total_ticks= get_ticks();
 	t->stats.system_ticks += total_ticks - current()->stats.elapsed_total_ticks;
 	t->stats.elapsed_total_ticks=total_ticks;
-
 }
 
-void update_user_ticks(){
-
+void update_user_ticks() {
 	struct task_struct *t= current();
 	int total_ticks= get_ticks();
 	t->stats.user_ticks += total_ticks - t->stats.elapsed_total_ticks;
 	t->stats.elapsed_total_ticks = total_ticks;
-
 }
-
-
-
-
-
-
 
 int sys_write(int fd, char *buf, int size) {
 	int e = check_fd(fd, ESCRIPTURA);
