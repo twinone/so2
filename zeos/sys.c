@@ -106,7 +106,71 @@ extern int getebp();
 
 int ret_from_fork() { return 0; }
 
+int sys_clone(void (*ret_from_clone)(), void *stack) {
+	printk("\n sys_clone start\n");
+	if (list_empty(&freequeue)) {
+		printk("\n sys_fork no free process, try again\n");
+		return -EAGAIN;
+	}
+	struct list_head *e = list_first(&freequeue);
 
+	list_del(e);
+
+	struct task_struct *new_t = list_entry(e, struct task_struct, anchor);
+	union task_union *new_u = (union task_union*) new_t;
+
+	struct task_struct *curr_t = current();
+	union task_union *curr_u = (union task_union*) curr_t;
+
+	
+	copy_data(curr_u, new_u, KERNEL_STACK_SIZE * sizeof(long));
+/*	allocate_DIR(new_t);
+
+	page_table_entry *new_PT =  get_PT(new_t);
+	page_table_entry *curr_PT =  get_PT(curr_t);	
+
+	for (int i = 0; i < NUM_PAG_CODE; i++)
+		set_ss_pag(new_PT, PAG_LOG_INIT_CODE + i, curr_PT[PAG_LOG_INIT_CODE+i].bits.pbase_addr);
+	for (int i = 0; i < NUM_PAG_KERNEL; i++)
+		set_ss_pag(new_PT, i, curr_PT[i].bits.pbase_addr);
+
+ 	int dataFrames[NUM_PAG_DATA];
+	for (int i = 0; i < NUM_PAG_DATA; i++){
+		dataFrames[i] = alloc_frame();
+		if (dataFrames[i] < 0) {
+			for (int j = 0;j < i; j++) free_frame(dataFrames[j]);
+	printk("\n sys_fork ENOMEM\n");
+			return -ENOMEM;
+		}
+	}
+	for (int i = 0; i < NUM_PAG_DATA; i++) {
+		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
+		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
+		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_FREE_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
+		del_ss_pag(curr_PT, FIRST_FREE_PAGE + i);
+	}
+	set_cr3(curr_t->dir_pages_baseAddr);
+*/
+	new_t->PID = nextPID++;
+
+	// set esp
+	new_u->stack[KERNEL_STACK_SIZE-2] = stack;
+	// set eip
+	new_u->stack[KERNEL_STACK_SIZE-5] = ret_from_clone;
+
+	int ebp_offset = getebp() & 0xfff;
+	int new_ebp = ebp_offset + (int)new_t;
+
+	new_u->task.kernel_esp = new_ebp - 1*sizeof(long);
+	new_u->stack[ebp_offset/sizeof(long) - 0] = (long)&ret_from_fork;
+	new_u->stack[ebp_offset/sizeof(long) - 1] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
+
+	init_stats(new_t);
+
+	list_add_tail(&new_t->anchor, &readyqueue);
+	printk("\n sys_clone end\n");
+	return new_t->PID;
+}
 
 
 int sys_fork() {

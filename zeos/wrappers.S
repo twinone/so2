@@ -98,6 +98,44 @@ end4:
 	pop %ebp
 	ret
 
+ENTRY(clone)
+	push %ebp
+	mov %esp, %ebp
+
+	push %ebx
+	push %ecx
+
+	mov 12(%ebp), %ecx   #stack
+	mov 8(%ebp), %ebx    #function
+
+	lea ret42, %eax // sysenter return correctly
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $2, %eax
+	sysenter
+ret42:	pop %ebp
+	add $4, %esp // remove the lea
+
+	pop %ecx
+	pop %ebx
+
+	cmp $0, %eax // check return value of the implementation
+	jge end42 // if 0, leave it as is, the syscall succeeded
+	// if syscall fails, store the reason in errno
+	lea errno, %ebx
+	// we have to make the return value positive
+	not %eax
+	add $1, %eax
+	mov %eax, (%ebx)
+	mov $-1, %eax // return -1
+end42:    
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
+
+
 
 
 

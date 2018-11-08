@@ -17,6 +17,9 @@ int strlen(char *a);
 int getpid();
 
 int fork();
+
+int clone(void (*)(), void *);
+
 int get_stats(int pid, struct stats* st);
 
 void perror();
