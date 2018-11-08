@@ -88,6 +88,9 @@ ret4:	pop %ebp
 	jge end4 // if 0, leave it as is, the syscall succeeded
 	// if syscall fails, store the reason in errno
 	lea errno, %ebx
+	// we have to make the return value positive
+	not %eax
+	add $1, %eax
 	mov %eax, (%ebx)
 	mov $-1, %eax // return -1
 end4:    
@@ -133,29 +136,25 @@ ENTRY(get_stats)
 	movl %esp, %ebp
 	mov $35, %eax
 	sysenter
-ret6:	
-	/*pop %ebp
-	add $4, %esp
+ret6:	pop %ebp
+	add $4, %esp // remove the lea
 
-	pop %ebx
-	pop %ecx
-
-
-	mov %ebp, %esp
-	pop %ebp*/ //done it in end_stat
-
+	pop %ebx // save ebx
+	pop %ecx // save ecx
 
 	cmp $0, %eax // check return value of the implementation
-	je end_stat // if 0, leave it as is, the syscall succeeded
+	je end6 // if 0, leave it as is, the syscall succeeded
 	// if syscall fails, store the reason in errno
 	lea errno, %ebx
+
+	// invert syscall
+	not %eax
+	add $1, %eax
+
 	mov %eax, (%ebx)
 	mov $-1, %eax // return -1
-
-end_stat:
-	pop %ebx
-	pop %ecx
-
+end6:    
 	mov %ebp, %esp
 	pop %ebp
 	ret
+

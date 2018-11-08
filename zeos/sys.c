@@ -176,6 +176,8 @@ void sys_exit()
 	//printk("\n sys_exit start\n");
 	free_user_pages(current());
 	update_process_state_rr(current(), &freequeue);
+	current()->PID = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
+
 	sched_next_rr();
 	printk("\n u fucked up\n");	//execution never reaches here
 }
@@ -192,28 +194,35 @@ struct task_struct *ts_from_pid(int pid) {
 
 int sys_get_stats(int pid, struct stats* st) {
 	//printk("\nenter sys_get_stats\n");
+	if (pid < 0)  return -EINVAL;
+	if (st == NULL) return -EFAULT;
 	struct task_struct *t = ts_from_pid(pid);
-	if (t == NULL) return -1; // INVALID PID
+	if (t == NULL) return -ESRCH; // INVALID PID
 	
-	if(t->state == ST_READY){ //update process t stats on a ready process
-	int total_ticks = get_ticks();
-	t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;;
-	t->stats.elapsed_total_ticks = total_ticks;
+	// we have to check that the we can actually write to that pointer,
+	// or we will have a serious security vuln
 
+	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) {
+		printk("ok\n");
+		return -EFAULT;
+
+	}
+	
+
+	if(t->state == ST_READY){ //update process t stats on a ready process
+		int total_ticks = get_ticks();
+		t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;;
+		t->stats.elapsed_total_ticks = total_ticks;
 	}
 
 	if(t->state == ST_READY){ //update process t stats on a blocked process
-	int total_ticks = get_ticks();
-	t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
-	t->stats.elapsed_total_ticks = total_ticks;
+		int total_ticks = get_ticks();
+		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
+		t->stats.elapsed_total_ticks = total_ticks;
 
 	}	
 
-	// we have to check that the we can actually write to that pointer,
-	// or we will have a serious security vuln
-	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) return -EACCES;
 	
-
 	copy_to_user(&t->stats, st, sizeof(struct stats));
 //	printk("\nexit sys_get_stats\n");
 
