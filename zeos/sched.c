@@ -221,7 +221,6 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
 			//printk("\ninc total trans\n");
-		t->stats.total_trans++;
 	} else { // unknown list (blocked queue for example)
 		t->state = ST_READY; // don't use blocked yet
 	}
@@ -238,8 +237,11 @@ void sched_next_rr() {
 		
 	update_process_state_rr(t, NULL);
 	ticks = 0;
+
+	// Update stats	
 	t->stats.remaining_ticks = t->quantum;
 	t->stats.total_trans++;
+
 	
 	task_switch((union task_union *)t);
 }

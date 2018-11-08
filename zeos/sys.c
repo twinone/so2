@@ -110,7 +110,7 @@ int ret_from_fork() { return 0; }
 
 
 int sys_fork() {
-	printk("\n sys_fork start\n");
+	//printk("\n sys_fork start\n");
 	if (list_empty(&freequeue)) {
 		printk("\n sys_fork no free process, try again\n");
 		return -EAGAIN;
@@ -166,18 +166,18 @@ int sys_fork() {
 	init_stats(new_t);
 
 	list_add_tail(&new_t->anchor, &readyqueue);
-	printk("\n sys_fork end\n");
+	//printk("\n sys_fork end\n");
 	return new_t->PID;
 }
 
 
 void sys_exit()
 {
-	printk("\n sys_exit start\n");
+	//printk("\n sys_exit start\n");
 	free_user_pages(current());
 	update_process_state_rr(current(), &freequeue);
 	sched_next_rr();
-	printk("\n sys_exit end\n");	//execution never reaches here
+	printk("\n u fucked up\n");	//execution never reaches here
 }
 
 
@@ -191,7 +191,7 @@ struct task_struct *ts_from_pid(int pid) {
 
 
 int sys_get_stats(int pid, struct stats* st) {
-	printk("\nenter sys_get_stats\n");
+	//printk("\nenter sys_get_stats\n");
 	struct task_struct *t = ts_from_pid(pid);
 	if (t == NULL) return -1; // INVALID PID
 	
@@ -213,11 +213,11 @@ int sys_get_stats(int pid, struct stats* st) {
 	// or we will have a serious security vuln
 	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) return -EACCES;
 	
-	t->stats.user_ticks = 500;//*delete*//
+
 	copy_to_user(&t->stats, st, sizeof(struct stats));
-	printk("\nexit sys_get_stats\n");
-	return 1; // if we return 0 here everything breaks, in the teacher's lib
-		
+//	printk("\nexit sys_get_stats\n");
+
+	return 0; // if we return 0 here everything breaks, in the teacher's lib
 }
 
 
