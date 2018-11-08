@@ -28,6 +28,7 @@ struct task_struct {
 	int quantum;
 	enum state_t state;
 	struct stats stats;
+	int dirPos; // position of the page table entry, set by allocate_DIR
 };
 
 union task_union {
@@ -39,6 +40,8 @@ extern union task_union protected_tasks[NR_TASKS+2];
 extern union task_union *task; /* Vector de tasques */
 extern struct task_struct *idle_task;
 
+// Contador de referencias de directorios (para threads)
+int refcounter[NR_TASKS];
 
 extern struct list_head freequeue;
 extern struct list_head readyqueue;

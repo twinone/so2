@@ -45,6 +45,14 @@ int __attribute__ ((__section__(".text.main")))
 		w("soy er papi\n");
 	}
 
+	int pid = fork();
+	if (pid == 0) {
+		w("hijo\n");
+	} else {
+		w("padre, exit\n");
+		exit();
+	}
+
 	
 	
 	while(1);

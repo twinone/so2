@@ -50,20 +50,23 @@ page_table_entry * get_PT (struct task_struct *t)
 }
 
 
+
+
 int allocate_DIR(struct task_struct *t) 
 {
-	int pos;
-	// position of the task_struct in the task vector
-	pos = ((int)t-(int)task)/sizeof(union task_union);
-
+	int pos = 0;
+	while (refcounter[pos] != 0) pos++;
+	
 	t->dir_pages_baseAddr = (page_table_entry*) &dir_pages[pos]; 
+	t->dirPos = pos;
 
+	refcounter[pos] = 1;
 	return 1;
 }
 
 void cpu_idle(void) {
 	__asm__ __volatile__("sti": : :"memory");
-	while(1){printk("i"); for(int i = 0; i < 1000000; i++){printk("");}}
+	while(1){printk("."); for(int i = 0; i < 1000000; i++){printk("");}}
 }
 
 void init_idle () {
@@ -133,6 +136,8 @@ void init_task1() {
 
 
 void init_sched() {
+	// all pages are free
+	for (int i = 0; i < NR_TASKS; i++) refcounter[i] = 0;
 
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);

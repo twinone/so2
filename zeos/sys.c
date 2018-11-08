@@ -94,10 +94,11 @@ int sys_getpid() {
 
 extern int getebp();
 
+
 int ret_from_fork() { return 0; }
 
 int sys_clone(void (*ret_from_clone)(), void *stack) {
-	printk("\n sys_clone start\n");
+	//printk("\n sys_clone start\n");
 	if (list_empty(&freequeue)) {
 		printk("\n sys_fork no free process, try again\n");
 		return -EAGAIN;
@@ -114,33 +115,7 @@ int sys_clone(void (*ret_from_clone)(), void *stack) {
 
 	
 	copy_data(curr_u, new_u, KERNEL_STACK_SIZE * sizeof(long));
-/*	allocate_DIR(new_t);
 
-	page_table_entry *new_PT =  get_PT(new_t);
-	page_table_entry *curr_PT =  get_PT(curr_t);	
-
-	for (int i = 0; i < NUM_PAG_CODE; i++)
-		set_ss_pag(new_PT, PAG_LOG_INIT_CODE + i, curr_PT[PAG_LOG_INIT_CODE+i].bits.pbase_addr);
-	for (int i = 0; i < NUM_PAG_KERNEL; i++)
-		set_ss_pag(new_PT, i, curr_PT[i].bits.pbase_addr);
-
- 	int dataFrames[NUM_PAG_DATA];
-	for (int i = 0; i < NUM_PAG_DATA; i++){
-		dataFrames[i] = alloc_frame();
-		if (dataFrames[i] < 0) {
-			for (int j = 0;j < i; j++) free_frame(dataFrames[j]);
-	printk("\n sys_fork ENOMEM\n");
-			return -ENOMEM;
-		}
-	}
-	for (int i = 0; i < NUM_PAG_DATA; i++) {
-		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
-		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
-		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_FREE_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
-		del_ss_pag(curr_PT, FIRST_FREE_PAGE + i);
-	}
-	set_cr3(curr_t->dir_pages_baseAddr);
-*/
 	new_t->PID = nextPID++;
 
 	// set esp
@@ -156,9 +131,10 @@ int sys_clone(void (*ret_from_clone)(), void *stack) {
 	new_u->stack[ebp_offset/sizeof(long) - 1] = THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 
 	init_stats(new_t);
+	refcounter[new_u->task.dirPos]++;
 
 	list_add_tail(&new_t->anchor, &readyqueue);
-	printk("\n sys_clone end\n");
+	//printk("\n sys_clone end\n");
 	return new_t->PID;
 }
 
@@ -234,8 +210,8 @@ void sys_exit()
 
 	sched_next_rr();
 	printk("\n u fucked up\n");	//execution never reaches here
-}
 
+}
 
 struct task_struct *ts_from_pid(int pid) {
 	for (int i = 0; i < NR_TASKS; i++) {
