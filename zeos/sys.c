@@ -252,45 +252,79 @@ int sys_get_stats(int pid, struct stats* st) {
 	return 0;
 }
 
-int sem_pos_from_id(int id) {
+struct semaphore *sem_from_id(int id) {
 	for (int i = 0; i < NR_SEMAPHORES; i++) 
 		if (semaphores[i].id == id)
-			return i;
-	return -1;
+			return &semaphores[i];
+	return NULL;
 }
 
-int get_free_sem() {
+struct semaphore *get_free_sem() {
 	for (int i = 0; i < NR_SEMAPHORES; i++) 
 		if (semaphores[i].id < 0)
-			return i;
-	return -1;
+			return &semaphores[i];
+	return NULL;
 }
 
 int sys_sem_init(int id, unsigned int value) {
 	if (id < 0) return -1; // invalid id
-	if (sem_pos_from_id(id) != -1) return -1; // already used
+	if (sem_from_id(id) != NULL) return -1; // already used
 	
-	int pos = get_free_sem();
-	if (pos == -1) return -1; // no free semaphores
+	struct semaphore *s = get_free_sem();
+	if (s == NULL) return -1; // no free semaphores
 	
-	semaphores[pos].id = id;
-	semaphores[pos].value = value;
-	semaphores[pos].owner = current()->PID;
+	s->id = id;
+	s->value = value;
+	s->owner = current()->PID;
 
-	INIT_LIST_HEAD(&semaphores[pos].procs);
+	INIT_LIST_HEAD(&s->procs);
 
 	return 0;
 }
 
 int sys_sem_wait(int id) {
+	if (id < 0) return -1; // invalid id
+	struct semaphore *s = sem_from_id(id);
+	if (s == NULL) return -1; // invalid sem
+
+	
+	if (s->value > 0) {
+		s->value--;
+	} else {
+		update_process_state_rr(current(), &s->procs);
+		sched_next_rr();
+		return sem_from_id(id) == NULL ? -1 : 0; 	
+	}
+
 	return 0;
 }
 
 int sys_sem_signal(int id) {
+	if (id < 0) return -1; // invalid id
+	struct semaphore *s = sem_from_id(id);
+	if (s == NULL) return -1; // invalid sem
+
+	if (list_empty(&s->procs)) {
+		s->value++;
+	} else {
+		struct task_struct *t = list_head_to_task_struct(list_first(&s->procs));
+		update_process_state_rr(t, &readyqueue);
+	}
+
 	return 0;
 }
 
 int sys_sem_destroy(int id) {
+	if (id < 0) return -1; // invalid id
+	struct semaphore *s = sem_from_id(id);
+	if (s == NULL) return -1; // invalid sem
+	if (s->owner != current()->PID) return -1; // not owner
+	
+	while (!list_empty(&s->procs)) {
+		struct task_struct *t = list_head_to_task_struct(list_first(&s->procs));
+		update_process_state_rr(t, &readyqueue);
+	}
+
 	return 0;
 }
 

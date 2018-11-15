@@ -14,6 +14,7 @@ struct task_struct *idle_task;
 
 struct list_head freequeue;
 struct list_head readyqueue;
+struct list_head blockedqueue;
 
 int ticks = 0;
 
@@ -197,7 +198,7 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 
 	}
 	if (t->state != ST_RUN) {
-		if(t->state == ST_BLOCKED){ //comes from state blocked
+		if(t->state == ST_BLOCKED) { //comes from state blocked
 		unsigned long total_ticks= get_ticks();
 		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
 		t->stats.elapsed_total_ticks=total_ticks;
