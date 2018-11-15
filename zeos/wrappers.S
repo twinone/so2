@@ -196,3 +196,75 @@ end6:
 	pop %ebp
 	ret
 
+
+
+
+// SEMAPHORES
+ENTRY(sem_init)
+	push %ebp
+	mov %esp, %ebp
+	push %ecx
+	push %ebx
+	mov 12(%ebp), %ecx   // value
+	mov 8(%ebp), %ebx    // id
+	lea ret_sem, %eax
+	push %eax
+	push %ebp
+	movl %esp, %ebp
+	mov $21, %eax
+	sysenter
+
+ENTRY(sem_wait)
+	push %ebp
+	mov %esp, %ebp
+	push %ebx
+	mov 8(%ebp), %ebx // id
+	lea ret_sem, %eax
+	push %eax
+	push %ebp
+	movl %esp, %ebp
+	mov $22, %eax
+	sysenter
+
+ENTRY(sem_signal)
+	push %ebp
+	mov %esp, %ebp
+	push %ebx
+	mov 8(%ebp), %ebx // id
+	lea ret_sem, %eax
+	push %eax
+	push %ebp
+	movl %esp, %ebp
+	mov $23, %eax
+	sysenter
+
+
+ENTRY(sem_destroy)
+	push %ebp
+	mov %esp, %ebp
+	push %ebx
+	mov 8(%ebp), %ebx // id
+	lea ret_sem, %eax
+	push %eax
+	push %ebp
+	movl %esp, %ebp
+	mov $24, %eax
+	sysenter
+
+// SINGLE return point for all semaphores
+ret_sem:
+    	pop %ebp
+	add $4, %esp
+	cmp $0, %eax
+	je end_sem
+	lea errno, %ebx
+	mov %eax, (%ebx)
+	mov $-1, %eax
+end_sem:
+	pop %ebx
+	pop %ecx
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
+

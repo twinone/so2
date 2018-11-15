@@ -119,9 +119,9 @@ int sys_clone(void (*ret_from_clone)(), void *stack) {
 	new_t->PID = nextPID++;
 
 	// set esp
-	new_u->stack[KERNEL_STACK_SIZE-2] = stack;
+	new_u->stack[KERNEL_STACK_SIZE-2] = (long)stack;
 	// set eip
-	new_u->stack[KERNEL_STACK_SIZE-5] = ret_from_clone;
+	new_u->stack[KERNEL_STACK_SIZE-5] = (long)ret_from_clone;
 
 	int ebp_offset = getebp() & 0xfff;
 	int new_ebp = ebp_offset + (int)new_t;
@@ -260,9 +260,21 @@ int sys_get_stats(int pid, struct stats* st) {
 }
 
 
+int sys_sem_init(int id, unsigned int value) {
+	return 0;
+}
 
+int sys_sem_wait(int id) {
+	return 0;
+}
 
+int sys_sem_signal(int id) {
+	return 0;
+}
 
+int sys_sem_destroy(int id) {
+	return 0;
+}
 
 
 

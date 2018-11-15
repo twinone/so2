@@ -231,10 +231,8 @@ void free_user_pages( struct task_struct *task )
 	refcounter[task->dirPos]--;
 	// check if there is more than 1 reference to this directory
 	if (refcounter[task->dirPos] > 0) {
-		printk("still references left\n");
 		return;
 	}
-	printk("freeing\n");
 
 	int pag;
 	page_table_entry * process_PT =  get_PT(task);
