@@ -11,6 +11,7 @@
 #include <stats.h>
 #include <THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING.h>
 
+#define NR_SEMAPHORES 20
 #define NR_TASKS      10
 #define KERNEL_STACK_SIZE	1024
 #define DEFAULT_QUANTUM THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING
@@ -45,6 +46,15 @@ int refcounter[NR_TASKS];
 
 extern struct list_head freequeue;
 extern struct list_head readyqueue;
+
+struct semaphore {
+	int id;
+	int value;
+	int owner; // pid
+	struct list_head procs;
+};
+
+struct semaphore semaphores[NR_SEMAPHORES];
 
 #define KERNEL_ESP(t)       	(DWord) &(t)->stack[KERNEL_STACK_SIZE]
 

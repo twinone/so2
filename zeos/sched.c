@@ -138,6 +138,7 @@ void init_task1() {
 void init_sched() {
 	// all pages are free
 	for (int i = 0; i < NR_TASKS; i++) refcounter[i] = 0;
+	for (int i = 0; i < NR_SEMAPHORES; i++) semaphores[i].id = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);

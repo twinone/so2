@@ -223,44 +223,62 @@ struct task_struct *ts_from_pid(int pid) {
 
 
 int sys_get_stats(int pid, struct stats* st) {
-	//printk("\nenter sys_get_stats\n");
+
 	if (pid < 0)  return -EINVAL;
 	if (st == NULL) return -EFAULT;
 	struct task_struct *t = ts_from_pid(pid);
-	if (t == NULL) return -ESRCH; // INVALID PID
+	if (t == NULL) return -ESRCH;
 	
-	// we have to check that the we can actually write to that pointer,
-	// or we will have a serious security vuln
-
 	if (!access_ok(VERIFY_WRITE, st, sizeof(struct stats))) {
 		printk("ok\n");
 		return -EFAULT;
 
 	}
 	
-
-	if(t->state == ST_READY){ //update process t stats on a ready process
+	if(t->state == ST_READY) {
 		int total_ticks = get_ticks();
 		t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;;
 		t->stats.elapsed_total_ticks = total_ticks;
 	}
 
-	if(t->state == ST_READY){ //update process t stats on a blocked process
+	if(t->state == ST_READY) {
 		int total_ticks = get_ticks();
 		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
 		t->stats.elapsed_total_ticks = total_ticks;
 
 	}	
 
-	
 	copy_to_user(&t->stats, st, sizeof(struct stats));
-//	printk("\nexit sys_get_stats\n");
-
-	return 0; // if we return 0 here everything breaks, in the teacher's lib
+	return 0;
 }
 
+int sem_pos_from_id(int id) {
+	for (int i = 0; i < NR_SEMAPHORES; i++) 
+		if (semaphores[i].id == id)
+			return i;
+	return -1;
+}
+
+int get_free_sem() {
+	for (int i = 0; i < NR_SEMAPHORES; i++) 
+		if (semaphores[i].id < 0)
+			return i;
+	return -1;
+}
 
 int sys_sem_init(int id, unsigned int value) {
+	if (id < 0) return -1; // invalid id
+	if (sem_pos_from_id(id) != -1) return -1; // already used
+	
+	int pos = get_free_sem();
+	if (pos == -1) return -1; // no free semaphores
+	
+	semaphores[pos].id = id;
+	semaphores[pos].value = value;
+	semaphores[pos].owner = current()->PID;
+
+	INIT_LIST_HEAD(&semaphores[pos].procs);
+
 	return 0;
 }
 
