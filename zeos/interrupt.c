@@ -8,11 +8,17 @@
 #include <io.h>
 #include <system.h>
 #include <sched.h>
-
 #include <zeos_interrupt.h>
+#include <circular_buffer.h>
+
+
+cbuf keyboard_buffer;
+
+extern struct list_head keyboardqueue;
+
 
 Gate idt[IDT_ENTRIES];
-Register    idtR;
+Register idtR;
 
 char char_map[] =
 {
@@ -23,7 +29,7 @@ char char_map[] =
   'd','f','g','h','j','k','l','ñ',
   '\0','º','\0','ç','z','x','c','v',
   'b','n','m',',','.','-','\0','*',
-  '\0','\0','\0','\0','\0','\0','\0','\0',
+  '\0',' ','\0','\0','\0','\0','\0','\0',
   '\0','\0','\0','\0','\0','\0','\0','7',
   '8','9','-','4','5','6','+','1',
   '2','3','0','\0','\0','\0','<','\0',
@@ -103,17 +109,42 @@ void setIdt()
 
 
 
+void initKeyboard() {
+	cbuf_init(&keyboard_buffer);
+}
+
+
 
 
 void keyboard_routine() {
-	unsigned char keyCode = inb(0x60);
+	volatile unsigned char keyCode = inb(0x60);
 	char make = !(keyCode >> 7);
 	if (!make) return;
 
-	unsigned char key = char_map[keyCode];
+	volatile unsigned char c = char_map[keyCode];
+
         // < 32 are non printable ascii
-	if (key < 32) printc_xy(0, 0, 'C');		
-	else printc_xy(0,0,key);
+	if (c < 32) printc_xy(0, 0, 'C');		
+	else printc_xy(0,0,c);
+	
+	// circular buffer
+	cbuf_write(&keyboard_buffer, c);
+
+	// update any blocked processes
+	if (!list_empty(&keyboardqueue)) {
+		struct task_struct *t = list_head_to_task_struct(list_first(&keyboard_queue));
+		task_switch(t);
+	}
+
+	if (keyCode == 28) {
+		char x[2];
+		x[1] = '\0';
+		while (!cbuf_empty(&keyboard_buffer)) {
+			x[0] = cbuf_read(&keyboard_buffer);
+			printk(&x);
+		}
+	}
+
 }
 
 
@@ -125,7 +156,6 @@ void clock_routine() {
 
 	schedule();
 }
-
 
 
 

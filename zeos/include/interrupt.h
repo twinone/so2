@@ -6,6 +6,7 @@
 #define __INTERRUPT_H__
 
 #include <types.h>
+#include <circular_buffer.h>
 
 #define IDT_ENTRIES 256
 
@@ -23,6 +24,8 @@ void clock_routine();
 void keyboard_handler();
 void clock_handler();
 void system_call_handler();
+
+void initKeyboard();
 
 
 extern void syscall_handler_sysenter();

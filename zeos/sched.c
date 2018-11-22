@@ -14,7 +14,7 @@ struct task_struct *idle_task;
 
 struct list_head freequeue;
 struct list_head readyqueue;
-struct list_head blockedqueue;
+struct list_head keyboardqueue;
 
 int ticks = 0;
 
@@ -143,7 +143,7 @@ void init_sched() {
 
 	INIT_LIST_HEAD(&freequeue);
 	INIT_LIST_HEAD(&readyqueue);
-
+	INIT_LIST_HEAD(&keyboardqueue);
 
 	for (int i = 0; i < NR_TASKS; i++) {
 		struct task_struct *el = (struct task_struct *) &task[i];

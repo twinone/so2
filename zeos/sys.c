@@ -18,6 +18,8 @@
 
 #include <system.h>
 #include <errno.h>
+#include <interrupt.h>
+
 
 
 #define LECTURA 0
@@ -30,8 +32,9 @@ int nextPID = 2;
 
 int check_fd(int fd, int permissions)
 {
-  if (fd!=1) return -9; /*EBADF*/
-  if (permissions!=ESCRIPTURA) return -13; /*EACCES*/
+  if (fd != 1 && fd != 0) return -EBADF;
+  if (fd == 1 && permissions != ESCRIPTURA) return -EACCES;
+  if (fd == 0 && permissions != LECTURA) return -EACCES;
   return 0;
 }
 
@@ -59,6 +62,21 @@ void update_user_ticks() {
 	t->stats.user_ticks += total_ticks - t->stats.elapsed_total_ticks;
 	t->stats.elapsed_total_ticks = total_ticks;
 }
+
+void sys_read(int fd, char *buf, int count) {
+	int e = check_fd(fd, LECTURA);
+	if (!access_ok(VERIFY_WRITE, buf, count)) {
+		return -EFAULT;
+	}
+	// read the whole keyboard buffer, it's impossible something is there already for another
+	// process because the process would have been notified already
+	char temp[CBUF_SIZE];
+	
+	// block
+	
+	
+}
+
 
 int sys_write(int fd, char *buf, int size) {
 	int e = check_fd(fd, ESCRIPTURA);
@@ -346,7 +364,6 @@ void sys_exit()
 	printk("\n u fucked up\n");	//execution never reaches here
 
 }
-
 
 
 

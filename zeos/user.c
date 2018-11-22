@@ -38,7 +38,7 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
-	runjp();
+	//runjp();
 
 	while(1);
 
