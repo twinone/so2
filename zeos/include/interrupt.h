@@ -31,7 +31,7 @@ void initKeyboard();
 extern void syscall_handler_sysenter();
 extern void writeMSR(int addr, int val);
 
-
+extern cbuf keyboard_buffer;
 
 
 #endif  /* __INTERRUPT_H__ */

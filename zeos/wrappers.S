@@ -38,6 +38,48 @@ end:
 	ret
 
 
+ENTRY(read)
+	push %ebp
+	mov %esp, %ebp
+
+	push %ecx // save ecx
+	push %edx // save edx
+	push %ebx // save ebx
+
+	mov 16(%ebp), %edx   #size
+	mov 12(%ebp), %ecx   #buffer
+	mov 8(%ebp), %ebx    #fd
+
+	lea ret_read, %eax // sysenter return correctly
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $0, %eax
+	sysenter
+ret_read:
+	pop %ebp
+	add $4, %esp // remove the lea
+	
+	cmp $0, %eax // check return value of the implementation
+	je end_err_read // if 0, leave it as is, the syscall succeeded
+	// if syscall fails, store the reason in errno
+	lea errno, %ebx
+	mov %eax, (%ebx)
+	mov $-1, %eax // return -1
+	jmp end_read
+end_err_read:
+	mov 16(%ebp), %eax // if write succeeds, the written bytes are equal to the size parameter
+end_read:    
+	pop %ebx
+	pop %edx
+	pop %ecx
+
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
+
+
 ENTRY(gettime)
 	push %ebp
 	mov %esp, %ebp

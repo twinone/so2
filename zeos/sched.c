@@ -10,6 +10,7 @@
 #include <utils.h>
 
 
+
 struct task_struct *idle_task;
 
 struct list_head freequeue;
@@ -192,22 +193,17 @@ void update_sched_data_rr() {
 }
 
 void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
-	if(t->state == ST_BLOCKED){
-	
-	t->stats.blocked_ticks += get_ticks() - t->stats.elapsed_total_ticks;;
-
-	}
 	if (t->state != ST_RUN) {
 		if(t->state == ST_BLOCKED) { //comes from state blocked
-		unsigned long total_ticks= get_ticks();
+		unsigned long total_ticks = get_ticks();
 		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
-		t->stats.elapsed_total_ticks=total_ticks;
+		t->stats.elapsed_total_ticks = total_ticks;
 
 		}
 		else{ ///comes from state ready
-		unsigned long total_ticks= get_ticks();
+		unsigned long total_ticks = get_ticks();
 		t->stats.ready_ticks += get_ticks() - t->stats.elapsed_total_ticks;
-		t->stats.elapsed_total_ticks=total_ticks;
+		t->stats.elapsed_total_ticks = total_ticks;
 
 		}
 
@@ -217,10 +213,6 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 		list_add_tail(&t->anchor, dest);
 	}
 	if (dest == &readyqueue) {
-		//stats
-		
-
-		//end stats
 
 		t->state = ST_READY;
 	} else if (dest == &freequeue) {
@@ -229,7 +221,7 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 		t->state = ST_RUN;
 			//printk("\ninc total trans\n");
 	} else { // unknown list (blocked queue for example)
-		t->state = ST_READY; // don't use blocked yet
+		t->state = ST_BLOCKED; // don't use blocked yet
 	}
 }
 

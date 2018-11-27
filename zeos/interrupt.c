@@ -132,8 +132,13 @@ void keyboard_routine() {
 
 	// update any blocked processes
 	if (!list_empty(&keyboardqueue)) {
-		struct task_struct *t = list_head_to_task_struct(list_first(&keyboard_queue));
-		task_switch(t);
+		struct task_struct *t = list_head_to_task_struct(list_first(&keyboardqueue));
+		//update proces data before changing context
+
+		update_process_state_rr(current(),&readyqueue);
+		sched_next_rr();
+		
+		
 	}
 
 	if (keyCode == 28) {

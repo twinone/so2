@@ -47,6 +47,8 @@ int refcounter[NR_TASKS];
 
 extern struct list_head freequeue;
 extern struct list_head readyqueue;
+extern struct list_head keyboardqueue;
+
 
 struct semaphore {
 	int id;

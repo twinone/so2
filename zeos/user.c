@@ -38,11 +38,26 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
-	//runjp();
+	
+	
+	
+	/*char b[2];
+	read(0,b,1);
+	write(1,b,1);*/
 
+
+
+
+	writepid();
+	int pid = fork();
+	if(pid){
+	char b[2];
+	read(0,b,1);
+	write(1,b,1);}
+	writepid();
 	while(1);
 
-	int ret = sem_init(0, 0);
+	/*int ret = sem_init(0, 0);
 	if (ret == 0) w("ret ok\n");
 	else w("ret not ok \n");
 
@@ -61,7 +76,7 @@ int __attribute__ ((__section__(".text.main")))
 		w("padre before\n");
 		sem_wait(42);
 		w("padre after\n");
-	}
+	}*/
 
 	
 	

@@ -22,6 +22,7 @@
 
 
 
+
 #define LECTURA 0
 #define ESCRIPTURA 1
 
@@ -63,18 +64,33 @@ void update_user_ticks() {
 	t->stats.elapsed_total_ticks = total_ticks;
 }
 
-void sys_read(int fd, char *buf, int count) {
+int sys_read(int fd, char *buf, int count) {
+
 	int e = check_fd(fd, LECTURA);
+	if(e != 0)return e;
 	if (!access_ok(VERIFY_WRITE, buf, count)) {
 		return -EFAULT;
 	}
 	// read the whole keyboard buffer, it's impossible something is there already for another
 	// process because the process would have been notified already
 	char temp[CBUF_SIZE];
+	int i;
 	
-	// block
-	
-	
+	for(i=0; i<count; ++i){
+		if(cbuf_empty(&keyboard_buffer)){
+printk("read test3\n");
+			update_process_state_rr(current(), &keyboardqueue);
+			sched_next_rr();
+printk("read test1\4");
+		}
+		if(!cbuf_empty(&keyboard_buffer)){
+			temp[i%CBUF_SIZE] = cbuf_read(&keyboard_buffer);
+			if(i/CBUF_SIZE==0 && i>0)copy_to_user(temp, buf, CBUF_SIZE);
+		}
+	}
+
+	if(i/CBUF_SIZE!=0)copy_to_user(temp, buf, i/CBUF_SIZE);
+	return i;	
 }
 
 
