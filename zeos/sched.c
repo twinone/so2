@@ -184,7 +184,7 @@ struct task_struct* current()
 
 
 int needs_sched_rr() {
-	return current()->quantum <= ticks;
+	return current()->quantum <= ticks && !list_empty(&readyqueue);
 }
 
 void update_sched_data_rr() {
@@ -193,6 +193,7 @@ void update_sched_data_rr() {
 }
 
 void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
+	
 	if (t->state != ST_RUN) {
 		if(t->state == ST_BLOCKED) { //comes from state blocked
 		unsigned long total_ticks = get_ticks();
@@ -207,7 +208,7 @@ void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
 
 		}
 
-		list_del(&t->anchor);
+		if(t != idle_task)list_del(&t->anchor);
 	}
 	if (dest != NULL) {
 		list_add_tail(&t->anchor, dest);

@@ -56,7 +56,7 @@ inline void set_seg_regs(Word data_sel, Word stack_sel, DWord esp)
 }
 
 
-extern 		void zeos_init_auxjp();
+//extern 		void zeos_init_auxjp();
 /*
  *   Main entry point to ZEOS Operating System
  */
@@ -105,7 +105,7 @@ int __attribute__((__section__(".text.main")))
 
 
   printk("Entering user mode...\n");
-		zeos_init_auxjp();
+		//zeos_init_auxjp();
   enable_int();
   /*
    * We return from a 'theorical' call to a 'call gate' to reduce our privileges

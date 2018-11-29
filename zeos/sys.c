@@ -78,18 +78,23 @@ int sys_read(int fd, char *buf, int count) {
 	
 	for(i=0; i<count; ++i){
 		if(cbuf_empty(&keyboard_buffer)){
-printk("read test3\n");
+printk("read test1\n");
+			if(i>0)list_del(&(current()->anchor));
 			update_process_state_rr(current(), &keyboardqueue);
+if(list_empty(&readyqueue))printk("hauria de anar a idle\n");
 			sched_next_rr();
-printk("read test1\4");
+printk("read test2\n");
 		}
 		if(!cbuf_empty(&keyboard_buffer)){
 			temp[i%CBUF_SIZE] = cbuf_read(&keyboard_buffer);
 			if(i/CBUF_SIZE==0 && i>0)copy_to_user(temp, buf, CBUF_SIZE);
 		}
+		else {printk("error al llegir\n");--i;}
+
 	}
 
 	if(i/CBUF_SIZE!=0)copy_to_user(temp, buf, i/CBUF_SIZE);
+
 	return i;	
 }
 

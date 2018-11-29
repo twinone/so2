@@ -38,23 +38,13 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
-	
-	
-	
-	/*char b[2];
-	read(0,b,1);
-	write(1,b,1);*/
-
-
-
 
 	writepid();
 	int pid = fork();
-	if(pid){
-	char b[2];
-	read(0,b,1);
-	write(1,b,1);}
+	char b[5];
+	read(0,b,5);
 	writepid();
+	write(1,b,5);
 	while(1);
 
 	/*int ret = sem_init(0, 0);
