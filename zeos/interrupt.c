@@ -132,7 +132,6 @@ void keyboard_routine() {
 
 	// update any blocked processes
 	if (!list_empty(&keyboardqueue)) {
-		printk("hauria de desbloquejar\n");
 		struct list_head *l=list_first(&keyboardqueue);
 		struct task_struct *t = list_head_to_task_struct(l);
 		list_del(l);

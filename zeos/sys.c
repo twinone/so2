@@ -64,26 +64,18 @@ void update_user_ticks() {
 	t->stats.elapsed_total_ticks = total_ticks;
 }
 
-int sys_read(int fd, char *buf, int count) {
-
-	int e = check_fd(fd, LECTURA);
-	if(e != 0)return e;
-	if (!access_ok(VERIFY_WRITE, buf, count)) {
-		return -EFAULT;
-	}
-	// read the whole keyboard buffer, it's impossible something is there already for another
-	// process because the process would have been notified already
-	char temp[CBUF_SIZE];
+int sys_read_keyboard(char *buf, int count) {
 	int i;
-	
+	char temp[CBUF_SIZE];
 	for(i=0; i<count; ++i){
 		if(cbuf_empty(&keyboard_buffer)){
-printk("read test1\n");
 			if(i>0)list_del(&(current()->anchor));
-			update_process_state_rr(current(), &keyboardqueue);
-if(list_empty(&readyqueue))printk("hauria de anar a idle\n");
+			//update_process_state_rr(current(), &keyboardqueue);
+			if (i>0)list_add(&(current()->anchor), &keyboardqueue);
+			else list_add_tail(&(current()->anchor), &keyboardqueue);
+			current()->state = ST_BLOCKED; // don't use blocked yet
+			//fi update_process_state_rr
 			sched_next_rr();
-printk("read test2\n");
 		}
 		if(!cbuf_empty(&keyboard_buffer)){
 			temp[i%CBUF_SIZE] = cbuf_read(&keyboard_buffer);
@@ -95,7 +87,19 @@ printk("read test2\n");
 
 	if(i/CBUF_SIZE!=0)copy_to_user(temp, buf, i/CBUF_SIZE);
 
-	return i;	
+	return i;
+}	
+
+int sys_read(int fd, char *buf, int count) {
+
+	int e = check_fd(fd, LECTURA);
+	if(e != 0)return e;
+	if (!access_ok(VERIFY_WRITE, buf, count)) {
+		return -EFAULT;
+	}
+	// read the whole keyboard buffer, it's impossible something is there already for another
+	// process because the process would have been notified already
+	sys_read_keyboard(buf,count);
 }
 
 
