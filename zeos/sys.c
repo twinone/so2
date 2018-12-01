@@ -79,7 +79,7 @@ int sys_read_keyboard(char *user_buf, int count) {
 	// at this point this process will be the first in the kb q until it finishes it's read()
 	// if the buffer is full: what TODO?
 	read_num_pending_chars = count;
-	int addr = (int) user_buf;
+	char * addr = user_buf;
 	while (read_num_pending_chars > 0) {
 		if (cbuf_empty(&keyboard_buffer)) {
 			// nothing to read yet, wait but WE WAIT FIRST here
@@ -97,9 +97,6 @@ int sys_read_keyboard(char *user_buf, int count) {
 			read_num_pending_chars--;
 			i++;
 		}
-		printk("\n chars: \n");
-
-		sys_write(1, &buf, i);
 		// send the keyboard data to our servers (ehm, I mean to the user)
 		copy_to_user(buf, addr, i);
 		addr += i;

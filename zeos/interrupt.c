@@ -145,25 +145,6 @@ void keyboard_routine() {
 		update_process_state_rr_impl(t, &readyqueue, 1);
 		sched_next_rr();
 	}
-
-	/*
-	if (!list_empty(&keyboardqueue)) {
-		struct list_head *l = list_first(&keyboardqueue);
-		struct task_struct *t = list_head_to_task_struct(l);
-		list_del(l);
-
-		//update proces data before changing context
-		update_process_state_rr(current(),&readyqueue);
-
-		//add process from keyboardqueue to 1st place in ready queue
-		unsigned long total_ticks = get_ticks();
-		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
-		t->stats.elapsed_total_ticks = total_ticks;
-		list_add(&t->anchor, &readyqueue);
-		t->state = ST_RUN;
-		sched_next_rr();
-	}
-	*/
 }
 
 
