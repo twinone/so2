@@ -27,7 +27,7 @@ ENTRY (sys_call_table)
 	.long sys_sem_wait    	// 
 	.long sys_sem_signal    // 
 	.long sys_sem_destroy   // 
-	.long sys_ni_syscall    // 25
+	.long sys_yield         // 25
 	.long sys_ni_syscall    // 
 	.long sys_ni_syscall    // 
 	.long sys_ni_syscall    // 
@@ -38,6 +38,13 @@ ENTRY (sys_call_table)
 	.long sys_ni_syscall    // 
 	.long sys_ni_syscall    // 
 	.long sys_get_stats     // 35
+	.long sys_ni_syscall    // 
+	.long sys_ni_syscall    // 
+	.long sys_ni_syscall    // 
+	.long sys_ni_syscall    // 
+	.long sys_ni_syscall    // 40
+	.long sys_ni_syscall    // 
+	.long sys_yield    	// 42 // should be 24 for Linux but that one's occupied by awesome semaphores
 
 .globl MAX_SYSCALL
 	MAX_SYSCALL = (. - sys_call_table)/4

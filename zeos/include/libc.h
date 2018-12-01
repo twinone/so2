@@ -34,6 +34,7 @@ int sem_signal(int id);
 int sem_destroy(int id);
 
 
+void yield();
 
 
 // syscall function wrappers

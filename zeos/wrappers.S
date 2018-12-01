@@ -180,7 +180,23 @@ end42:
 
 
 
+ENTRY(yield)
+	push %ebp
+	mov %esp, %ebp
 
+	lea ret_yield, %eax
+	push %eax
+	push %ebp // fake dynamic link
+	movl %esp, %ebp
+	mov $42, %eax
+	sysenter
+ret_yield:  
+	pop %ebp
+	add $4, %esp
+
+   	mov %ebp, %esp
+	pop %ebp
+	ret
 
 
 

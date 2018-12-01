@@ -65,6 +65,10 @@ void update_user_ticks() {
 	t->stats.elapsed_total_ticks = total_ticks;
 }
 
+int sys_yield() {
+	update_process_state_rr(current(), &readyqueue);
+	sched_next_rr();
+}
 
 int sys_read_keyboard(char *user_buf, int count) {
 

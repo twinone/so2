@@ -38,17 +38,29 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
+	int pid = fork();
+	if (pid == 0) {
+		w("child start read\n");
+		char buf[3];
+		read(0, &buf, 3);
+		w("child end read\n");
+	}
+	else {
+		yield();
+		w("parent getstats start \n");
+		struct stats st;
+		get_stats(pid, &st);
+		w("parent getstats end \n");
+	}
 
-	runjp();
+	while(1);
+
+
+	runjp_rank(0, 3); // skip 4-6 they are SO SLOW come on (they are OK)
+	runjp_rank(7, 7); // this one hangs
+	runjp_rank(8, 10);
 	
-	/*int len = 5;
-	char buf[len];
-	read(0, buf, len);
-	write(1, "Got: ", 5); write(1, buf, len); write(1, "\n", 1);
-
-	read(0, buf, len);
-	write(1, "Got: ", 5); write(1, buf, len); write(1, "\n", 1);
-*/
+	
 	while(1);
 	return 0;
 }
