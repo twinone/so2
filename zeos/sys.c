@@ -30,11 +30,12 @@
 
 
 int nextPID = 2;
+int read_num_pending_chars = 0;
 
 int check_fd(int fd, int permissions)
 {
   if (fd != 1 && fd != 0) return -EBADF;
-  if (fd == 1 && permissions != ESCRIPTURA) return -EACCES;
+  if (fd == 1 && permissions != ESCRIPTURA) return -EBADF;
   if (fd == 0 && permissions != LECTURA) return -EACCES;
   return 0;
 }
@@ -64,42 +65,57 @@ void update_user_ticks() {
 	t->stats.elapsed_total_ticks = total_ticks;
 }
 
-int sys_read_keyboard(char *buf, int count) {
-	int i;
-	char temp[CBUF_SIZE];
-	for(i=0; i<count; ++i){
-		if(cbuf_empty(&keyboard_buffer)){
-			if(i>0)list_del(&(current()->anchor));
-			//update_process_state_rr(current(), &keyboardqueue);
-			if (i>0)list_add(&(current()->anchor), &keyboardqueue);
-			else list_add_tail(&(current()->anchor), &keyboardqueue);
-			current()->state = ST_BLOCKED; // don't use blocked yet
-			//fi update_process_state_rr
-			sched_next_rr();
-		}
-		if(!cbuf_empty(&keyboard_buffer)){
-			temp[i%CBUF_SIZE] = cbuf_read(&keyboard_buffer);
-			if(i/CBUF_SIZE==0 && i>0)copy_to_user(temp, buf, CBUF_SIZE);
-		}
-		else {printk("error al llegir\n");--i;}
 
+int sys_read_keyboard(char *user_buf, int count) {
+
+	if (!list_empty(&keyboardqueue)) {
+		// somebody else already waiting, we go to wait :(
+		update_process_state_rr(current(), &keyboardqueue);
+		sched_next_rr();
+		// at this point, it's our turn to read, because we got unblocked
+		// notice there is NO return statement here!
+	}
+	
+	// at this point this process will be the first in the kb q until it finishes it's read()
+	// if the buffer is full: what TODO?
+	read_num_pending_chars = count;
+	int addr = (int) user_buf;
+	while (read_num_pending_chars > 0) {
+		if (cbuf_empty(&keyboard_buffer)) {
+			// nothing to read yet, wait but WE WAIT FIRST here
+			update_process_state_rr_impl(current(), &keyboardqueue, 1);
+			sched_next_rr();
+			// at this point we are unblocked, which means there is DATA :)
+		}
+
+		// gotta buffer the buffer
+		int buflen = 8;	
+		char buf[buflen]; // this is precious kernel stack space, don't waste it
+		int i = 0;
+		while (i < buflen && !cbuf_empty(&keyboard_buffer) && read_num_pending_chars > 0) { 
+			buf[i] = cbuf_read(&keyboard_buffer);
+			read_num_pending_chars--;
+			i++;
+		}
+		printk("\n chars: \n");
+
+		sys_write(1, &buf, i);
+		// send the keyboard data to our servers (ehm, I mean to the user)
+		copy_to_user(buf, addr, i);
+		addr += i;
 	}
 
-	if(i/CBUF_SIZE!=0)copy_to_user(temp, buf, i/CBUF_SIZE);
-
-	return i;
+	return count;
 }	
 
 int sys_read(int fd, char *buf, int count) {
-
 	int e = check_fd(fd, LECTURA);
-	if(e != 0)return e;
+	if(e != 0) return e;
 	if (!access_ok(VERIFY_WRITE, buf, count)) {
 		return -EFAULT;
 	}
-	// read the whole keyboard buffer, it's impossible something is there already for another
-	// process because the process would have been notified already
-	sys_read_keyboard(buf,count);
+
+	return sys_read_keyboard(buf, count);
 }
 
 

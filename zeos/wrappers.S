@@ -61,7 +61,7 @@ ret_read:
 	add $4, %esp // remove the lea
 	
 	cmp $0, %eax // check return value of the implementation
-	je end_err_read // if 0, leave it as is, the syscall succeeded
+	jge end_err_read // if 0, leave it as is, the syscall succeeded
 	// if syscall fails, store the reason in errno
 	lea errno, %ebx
 	not %eax

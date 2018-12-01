@@ -97,6 +97,7 @@ void init_stats(struct task_struct *t);
 /* Headers for the scheduling policy */
 void sched_next_rr();
 void update_process_state_rr(struct task_struct *t, struct list_head *dest);
+void update_process_state_rr_impl(struct task_struct *t, struct list_head *dest, int start);
 int needs_sched_rr();
 void update_sched_data_rr();
 void schedule(); // called every clock tick

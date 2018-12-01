@@ -115,7 +115,7 @@ void initKeyboard() {
 
 
 
-
+extern int read_num_pending_chars;
 void keyboard_routine() {
 	volatile unsigned char keyCode = inb(0x60);
 	char make = !(keyCode >> 7);
@@ -130,14 +130,31 @@ void keyboard_routine() {
 	// circular buffer
 	cbuf_write(&keyboard_buffer, c);
 
-	// update any blocked processes
+	if (list_empty(&keyboardqueue)) return;
+
+	// if buffer full or we can satisfy current read op, unblock first(kb q)
+	if (cbuf_full(&keyboard_buffer) || cbuf_len(&keyboard_buffer) >= read_num_pending_chars) {
+		// add the current executing to the ready queue
+		// they can go to the end... that's fine.
+		update_process_state_rr(current(), &readyqueue);
+
+		struct list_head *e = list_first(&keyboardqueue);
+		struct task_struct *t = list_entry(e, struct task_struct, anchor);
+			
+		// insert t to the start of the ready queue and switch to it
+		update_process_state_rr_impl(t, &readyqueue, 1);
+		sched_next_rr();
+	}
+
+	/*
 	if (!list_empty(&keyboardqueue)) {
-		struct list_head *l=list_first(&keyboardqueue);
+		struct list_head *l = list_first(&keyboardqueue);
 		struct task_struct *t = list_head_to_task_struct(l);
 		list_del(l);
-		//update proces data before changing context
 
+		//update proces data before changing context
 		update_process_state_rr(current(),&readyqueue);
+
 		//add process from keyboardqueue to 1st place in ready queue
 		unsigned long total_ticks = get_ticks();
 		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
@@ -145,19 +162,8 @@ void keyboard_routine() {
 		list_add(&t->anchor, &readyqueue);
 		t->state = ST_RUN;
 		sched_next_rr();
-		
-		
 	}
-
-	if (keyCode == 28) {
-		char x[2];
-		x[1] = '\0';
-		while (!cbuf_empty(&keyboard_buffer)) {
-			x[0] = cbuf_read(&keyboard_buffer);
-			printk(x);
-		}
-	}
-
+	*/
 }
 
 

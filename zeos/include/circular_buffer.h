@@ -1,7 +1,7 @@
 #ifndef __CIRCULAR_BUFFER_H__
 #define __CIRCULAR_BUFFER_H__
 
-#define CBUF_SIZE 20
+#define CBUF_SIZE 10 // Less than 15 for test #6
 
 typedef struct cbuf {
 	int head; // used for reads

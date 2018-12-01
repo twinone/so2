@@ -193,36 +193,39 @@ void update_sched_data_rr() {
 }
 
 void update_process_state_rr(struct task_struct *t, struct list_head *dest) {
-	
+	update_process_state_rr_impl(t, dest, 0);
+}
+
+// we need this function to allow to insert at the end or beginning of the list
+// but we cannot modify the original function header (the function update_process_state_rr)
+// if start == 1 we will insert to the start of the list instead of the end
+void update_process_state_rr_impl(struct task_struct *t, struct list_head *dest, int start) {
 	if (t->state != ST_RUN) {
 		if(t->state == ST_BLOCKED) { //comes from state blocked
-		unsigned long total_ticks = get_ticks();
-		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
-		t->stats.elapsed_total_ticks = total_ticks;
-
+			unsigned long total_ticks = get_ticks();
+			t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
+			t->stats.elapsed_total_ticks = total_ticks;
 		}
 		else{ ///comes from state ready
-		unsigned long total_ticks = get_ticks();
-		t->stats.ready_ticks += get_ticks() - t->stats.elapsed_total_ticks;
-		t->stats.elapsed_total_ticks = total_ticks;
-
+			unsigned long total_ticks = get_ticks();
+			t->stats.ready_ticks += get_ticks() - t->stats.elapsed_total_ticks;
+			t->stats.elapsed_total_ticks = total_ticks;
 		}
 
-		if(t != idle_task)list_del(&t->anchor);
+		if(t != idle_task) list_del(&t->anchor);
 	}
 	if (dest != NULL) {
-		list_add_tail(&t->anchor, dest);
+		if (!start) list_add_tail(&t->anchor, dest);
+		else list_add(&t->anchor, dest);
 	}
 	if (dest == &readyqueue) {
-
 		t->state = ST_READY;
 	} else if (dest == &freequeue) {
 		t->state = -THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING;
 	} else if (dest == NULL) {
 		t->state = ST_RUN;
-			//printk("\ninc total trans\n");
-	} else { // unknown list (blocked queue for example)
-		t->state = ST_BLOCKED; // don't use blocked yet
+	} else { 
+		t->state = ST_BLOCKED;
 	}
 }
 
