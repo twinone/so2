@@ -64,6 +64,8 @@ ret_read:
 	je end_err_read // if 0, leave it as is, the syscall succeeded
 	// if syscall fails, store the reason in errno
 	lea errno, %ebx
+	not %eax
+	add $1, %eax
 	mov %eax, (%ebx)
 	mov $-1, %eax // return -1
 	jmp end_read
