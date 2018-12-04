@@ -31,6 +31,7 @@ struct task_struct {
 	struct stats stats;
 	int dirPos; // position of the page table entry, set by allocate_DIR
 	int sem_destroyed;
+	int brk;
 };
 
 union task_union {

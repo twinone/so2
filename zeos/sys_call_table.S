@@ -45,6 +45,9 @@ ENTRY (sys_call_table)
 	.long sys_ni_syscall    // 40
 	.long sys_ni_syscall    // 
 	.long sys_yield    	// 42 // should be 24 for Linux but that one's occupied by awesome semaphores
+	.long sys_ni_syscall    // 
+	.long sys_ni_syscall    // 
+	.long sys_sbrk          // 45 // there was no specific number in the ZeOS pdf, we use 45 because it's Linux's brk() syscall id
 
 .globl MAX_SYSCALL
 	MAX_SYSCALL = (. - sys_call_table)/4

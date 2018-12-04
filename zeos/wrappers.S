@@ -257,6 +257,37 @@ end6:
 	ret
 
 
+ENTRY(sbrk)
+	push %ebp
+	mov %esp, %ebp
+	push %ebx
+	mov 8(%ebp), %ebx
+	lea ret_brk, %eax
+	push %eax
+	push %ebp 
+	movl %esp, %ebp
+	mov $45, %eax
+	sysenter
+ret_brk:
+	pop %ebp
+	add $4, %esp 
+	pop %ebx
+	cmp $0, %eax
+	jge end_brk 
+	lea errno, %ebx
+	not %eax
+	add $1, %eax
+	mov %eax, (%ebx)
+	mov $-1, %eax
+end_brk:    
+	mov %ebp, %esp
+	pop %ebp
+	ret
+
+
+
+
+
 
 
 // SEMAPHORES

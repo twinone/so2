@@ -40,6 +40,7 @@ void yield();
 // syscall function wrappers
 extern int write(int fd, char *buffer, int size);
 extern int gettime ();
+int sbrk(int brk);
 
 extern int errno;
 

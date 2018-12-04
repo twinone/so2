@@ -27,6 +27,7 @@
 #define ESCRIPTURA 1
 
 #define FIRST_FREE_PAGE (PAG_LOG_INIT_DATA + NUM_PAG_DATA)
+#define MAX_HEAP 4096 * 20
 
 
 int nextPID = 2;
@@ -321,6 +322,21 @@ struct semaphore *get_free_sem() {
 		if (semaphores[i].id < 0)
 			return &semaphores[i];
 	return NULL;
+}
+
+int sys_sbrk(int inc) {
+	int prev = current()->brk;
+	current()->brk += inc;
+	
+	// allocate and map pages for the process
+	if (inc > 0) {
+	}
+
+	// free unused pages
+	if (inc < 0) {
+	}	
+
+	return prev;	
 }
 
 int sys_sem_init(int id, unsigned int value) {
