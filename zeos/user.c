@@ -40,10 +40,10 @@ void test_sbrk() {
 	brk = sbrk(30);
 	brk[2] = 'a';
 	brk[3] = '\0';
-	w(&brk[2]);
 
-	sbrk(-4096*2 + 30);
-	w(&brk[2]); // should generate a page fault
+
+	int pid = fork();	
+	w(&brk[2]);
 }
 
 extern void runjp();
@@ -55,7 +55,8 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
-	test_sbrk();
+
+
 
 
 	

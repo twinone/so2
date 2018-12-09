@@ -16,8 +16,6 @@
 #define LECTURA 0
 #define ESCRIPTURA 1
 
-#define FIRST_HEAP_PAGE (PAG_LOG_INIT_DATA + NUM_PAG_DATA)
-
 #define BLOCK_SIZE 4
 
 
@@ -222,27 +220,29 @@ int sys_fork() {
 	page_table_entry *new_PT =  get_PT(new_t);
 	page_table_entry *curr_PT =  get_PT(curr_t);	
 
-	for (int i = 0; i < NUM_PAG_CODE; i++)
-		set_ss_pag(new_PT, PAG_LOG_INIT_CODE + i, curr_PT[PAG_LOG_INIT_CODE+i].bits.pbase_addr);
 	for (int i = 0; i < NUM_PAG_KERNEL; i++)
 		set_ss_pag(new_PT, i, curr_PT[i].bits.pbase_addr);
 
- 	int dataFrames[NUM_PAG_DATA];
-	for (int i = 0; i < NUM_PAG_DATA; i++){
-		dataFrames[i] = alloc_frame();
-		if (dataFrames[i] < 0) {
-			for (int j = 0;j < i; j++) free_frame(dataFrames[j]);
-	printk("\n sys_fork ENOMEM\n");
+	for (int i = 0; i < NUM_PAG_CODE; i++)
+		set_ss_pag(new_PT, PAG_LOG_INIT_CODE + i, curr_PT[PAG_LOG_INIT_CODE+i].bits.pbase_addr);
+
+	// heap goes right after data, so we can copy both in a single run
+	int numFrames = NUM_PAG_DATA + curr_heap_pages();
+ 	int frames[numFrames];
+	for (int i = 0; i < numFrames; i++) {
+
+		frames[i] = alloc_frame();
+		if (frames[i] < 0) {
+			for (int j = 0;j < i; j++) free_frame(frames[j]);
+			printk("\n sys_fork ENOMEM\n");
 			return -ENOMEM;
 		}
 	}
-	for (int i = 0; i < NUM_PAG_DATA; i++) {
-		// TODO FIXME WE NEED TO FIX THIS, we need to find a free page that does NOT OVERWRITE THE HEAP
-		// ALSO WE NEED TO COPY THE HEAP
-		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
-		set_ss_pag(curr_PT, FIRST_HEAP_PAGE + i, dataFrames[i]);
-		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_HEAP_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
-		del_ss_pag(curr_PT, FIRST_HEAP_PAGE + i);
+	for (int i = 0; i < numFrames; i++) {
+		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, frames[i]); 
+		set_ss_pag(curr_PT, PAG_LOG_INIT_HEAP + curr_heap_pages() + i, frames[i]);
+		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((PAG_LOG_INIT_HEAP+curr_heap_pages()+i)*PAGE_SIZE), PAGE_SIZE); 
+		del_ss_pag(curr_PT, PAG_LOG_INIT_HEAP + curr_heap_pages() + i);
 	}
 	set_cr3(curr_t->dir_pages_baseAddr);
 
@@ -321,8 +321,12 @@ int num_heap_pages(int bytes) {
 	return bytes / PAGE_SIZE + !!(bytes % PAGE_SIZE);
 }
 
+int curr_heap_pages() {
+	return num_heap_pages(current()->brk);
+}
+
 int first_free_page() {
-	return num_heap_pages(current()->brk) + FIRST_HEAP_PAGE;
+	return num_heap_pages(current()->brk) + PAG_LOG_INIT_HEAP;
 }
 
 int sys_sbrk(int inc) {
