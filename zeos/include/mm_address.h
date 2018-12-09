@@ -12,6 +12,9 @@
 #define NUM_PAG_DATA 20
 #define PAGE_SIZE 0x1000
 
+#define PAG_LOG_INIT_HEAP (PAG_LOG_INIT_DATA+NUM_PAG_DATA)
+#define NUM_PAG_HEAP 30
+
 /* Memory distribution */
 /***********************/
 

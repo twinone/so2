@@ -3,31 +3,23 @@
  */
 
 #include <THE_ANSWER_TO_THE_ULTIMATE_QUESTION_OF_LIFE_THE_UNIVERSE_AND_EVERYTHING.h>
-
 #include <devices.h>
-
 #include <utils.h>
-
 #include <io.h>
-
 #include <mm.h>
-
 #include <mm_address.h>
-
 #include <sched.h>
-
 #include <system.h>
 #include <errno.h>
 #include <interrupt.h>
 
-
-
-
 #define LECTURA 0
 #define ESCRIPTURA 1
 
-#define FIRST_FREE_PAGE (PAG_LOG_INIT_DATA + NUM_PAG_DATA)
-#define MAX_HEAP 4096 * 20
+#define FIRST_HEAP_PAGE (PAG_LOG_INIT_DATA + NUM_PAG_DATA)
+
+#define BLOCK_SIZE 4
+
 
 
 int nextPID = 2;
@@ -48,9 +40,6 @@ int sys_ni_syscall()
 
 
 
-#define BLOCK_SIZE 4
-
-
 
 void update_sys_ticks() {
 	struct task_struct *t = current();
@@ -69,6 +58,7 @@ void update_user_ticks() {
 int sys_yield() {
 	update_process_state_rr(current(), &readyqueue);
 	sched_next_rr();
+	return 0;
 }
 
 int sys_read_keyboard(char *user_buf, int count) {
@@ -247,10 +237,12 @@ int sys_fork() {
 		}
 	}
 	for (int i = 0; i < NUM_PAG_DATA; i++) {
+		// TODO FIXME WE NEED TO FIX THIS, we need to find a free page that does NOT OVERWRITE THE HEAP
+		// ALSO WE NEED TO COPY THE HEAP
 		set_ss_pag(new_PT, PAG_LOG_INIT_DATA + i, dataFrames[i]); 
-		set_ss_pag(curr_PT, FIRST_FREE_PAGE + i, dataFrames[i]);
-		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_FREE_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
-		del_ss_pag(curr_PT, FIRST_FREE_PAGE + i);
+		set_ss_pag(curr_PT, FIRST_HEAP_PAGE + i, dataFrames[i]);
+		copy_data((void*)((PAG_LOG_INIT_DATA + i)*PAGE_SIZE), (void*)((FIRST_HEAP_PAGE+i)*PAGE_SIZE), PAGE_SIZE); 
+		del_ss_pag(curr_PT, FIRST_HEAP_PAGE + i);
 	}
 	set_cr3(curr_t->dir_pages_baseAddr);
 
@@ -324,19 +316,53 @@ struct semaphore *get_free_sem() {
 	return NULL;
 }
 
+// returns the amount of pages we need to store bytes bytes
+int num_heap_pages(int bytes) {
+	return bytes / PAGE_SIZE + !!(bytes % PAGE_SIZE);
+}
+
+int first_free_page() {
+	return num_heap_pages(current()->brk) + FIRST_HEAP_PAGE;
+}
+
 int sys_sbrk(int inc) {
 	int prev = current()->brk;
+	int prevPageIndex = first_free_page();
+
 	current()->brk += inc;
+
+	int newPageIndex = first_free_page();
+	int pageDiff = newPageIndex - prevPageIndex;
 	
-	// allocate and map pages for the process
-	if (inc > 0) {
+
+	page_table_entry *pt =  get_PT(current());
+	// allocate new pages for the heap
+	for (int i = 0; i < pageDiff; i++) {
+		int heapFrames[pageDiff];
+		for (int i = 0; i < pageDiff; i++){
+			heapFrames[i] = alloc_frame();
+			if (heapFrames[i] < 0) {
+				for (int j = 0;j < i; j++) free_frame(heapFrames[j]);
+		printk("\n sys_sbrk ENOMEM\n");
+				return -ENOMEM;
+			}
+		}
+		// Only when we know there are enough physical pages, we allocate the data
+		for (int i = 0; i < pageDiff; i++) {
+			set_ss_pag(pt, prevPageIndex + i, heapFrames[i]); 
+		}
 	}
 
 	// free unused pages
-	if (inc < 0) {
-	}	
+	for (int i = 0; i < -pageDiff; i++) {
+		free_frame(pt[prevPageIndex-i-1].bits.pbase_addr);
+		pt[prevPageIndex-i-1].entry = 0;
+	}
+	// flush the TLb, we should no longer have access to this
+	set_cr3(current()->dir_pages_baseAddr);
 
-	return prev;	
+
+	return PAG_LOG_INIT_HEAP * PAGE_SIZE + prev;	
 }
 
 int sys_sem_init(int id, unsigned int value) {

@@ -15,10 +15,17 @@ void w(char *str) {
 	write(1, str, strlen(str));
 }
 
+void n(int n) {
+	char buf[10];
+	itoa(n, buf);
+	w(buf);
+}
+
 void clone_func() {
 	w("I'm Mr. Meeseeks, look at me!");
 	exit();
 }
+
 long stack[THREAD_STACK_SIZE];
 
 int test_clone() {
@@ -27,7 +34,17 @@ int test_clone() {
 
 
 
-	
+
+void test_sbrk() {
+	char *brk = sbrk(4096 * 2);
+	brk = sbrk(30);
+	brk[2] = 'a';
+	brk[3] = '\0';
+	w(&brk[2]);
+
+	sbrk(-4096*2 + 30);
+	w(&brk[2]); // should generate a page fault
+}
 
 extern void runjp();
 int __attribute__ ((__section__(".text.main")))
@@ -38,29 +55,11 @@ int __attribute__ ((__section__(".text.main")))
 	
 	w("Hello from userland\n");
 
-	int pid = fork();
-	if (pid == 0) {
-		w("child start read\n");
-		char buf[3];
-		read(0, &buf, 3);
-		w("child end read\n");
-	}
-	else {
-		yield();
-		w("parent getstats start \n");
-		struct stats st;
-		get_stats(pid, &st);
-		w("parent getstats end \n");
-	}
-
-	while(1);
+	test_sbrk();
 
 
-	runjp_rank(0, 3); // skip 4-6 they are SO SLOW come on (they are OK)
-	runjp_rank(7, 7); // this one hangs
-	runjp_rank(8, 10);
 	
-	
+
 	while(1);
 	return 0;
 }

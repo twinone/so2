@@ -2,10 +2,10 @@
 #include <segment.h>
 
 ENTRY (sys_call_table)
-	.long sys_read		// 0
+	.long sys_ni_syscall	// 0
 	.long sys_exit		// 
 	.long sys_fork    	// 
-	.long sys_ni_syscall    // 
+	.long sys_read          // ZeOS document read id missing, assuming 3 (like Linux)
 	.long sys_write         // 
 	.long sys_ni_syscall    // 5
 	.long sys_ni_syscall    // 
@@ -47,7 +47,7 @@ ENTRY (sys_call_table)
 	.long sys_yield    	// 42 // should be 24 for Linux but that one's occupied by awesome semaphores
 	.long sys_ni_syscall    // 
 	.long sys_ni_syscall    // 
-	.long sys_sbrk          // 45 // there was no specific number in the ZeOS pdf, we use 45 because it's Linux's brk() syscall id
+	.long sys_sbrk          // 45 ZeOS document sbrk id missing, assuming 3 (like Linux's brk())
 
 .globl MAX_SYSCALL
 	MAX_SYSCALL = (. - sys_call_table)/4
