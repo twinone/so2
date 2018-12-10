@@ -154,6 +154,27 @@ void clock_routine() {
 	zeos_ticks++;
 	zeos_show_clock();
 
+
+if(!zeos_ticks%5000){
+	printk("clock interrupt\nready processes:\n");
+	struct list_head *h=list_first(&readyqueue);
+	if(list_empty(&readyqueue))printk("no ready process\n");
+	else list_for_each(h,&readyqueue){
+		printk("there is someone ready\n");
+	}
+	printk("end readyqueue\n");
+	if(list_empty(&semaphores[0].procs))printk("no blocked process\n");
+	else {	
+		h=list_first(&semaphores[0].procs);
+		list_for_each(h,&semaphores[0].procs){
+			printk("there is someone in semaphores \n");
+		}
+
+	}
+}
+
+
+
 	schedule();
 }
 

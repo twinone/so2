@@ -100,7 +100,27 @@ USER INTERACTION NEEDED: Enter 5 characters '12345'..............12..3.4..5
 ..............................................
 
 	*/
-	runjp_rank(7,7);
+	int pid = fork();
+	if (pid>0){
+		int i = sem_init(2,0);
+		char b[5];
+		read(0,b,5);
+		w("sending signal\n");
+		i = sem_signal(2);
+		w("send signal\n");
+		while(1);	
+		
+	}	
+	else{
+		char b;
+		w("im the son and its sleepy time\n");
+		for(int i =0; i<10000000;++i)b=5;
+		int i = sem_wait(2);
+		w("i'm awake again\n");
+	}
+
+
+	//runjp_rank(7,7);
 
 
 	
