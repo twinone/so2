@@ -24,6 +24,12 @@ void free_frame( unsigned int frame );
 void set_user_pages( struct task_struct *task );
 void free_user_pages( struct task_struct *task );
 
+int num_heap_pages(int bytes);
+
+int curr_heap_pages();
+
+int first_free_page();
+
 extern Descriptor  *gdt;
 
 extern TSS         tss; 

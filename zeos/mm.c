@@ -226,6 +226,21 @@ int alloc_frame( void )
     return -1;
 }
 
+
+
+// returns the amount of pages we need to store bytes bytes
+int num_heap_pages(int bytes) {
+	return bytes / PAGE_SIZE + !!(bytes % PAGE_SIZE);
+}
+
+int curr_heap_pages() {
+	return num_heap_pages(current()->brk);
+}
+
+int first_free_page() {
+	return num_heap_pages(current()->brk) + PAG_LOG_INIT_HEAP;
+}
+
 void free_user_pages( struct task_struct *task )
 {
 	refcounter[task->dirPos]--;
@@ -234,12 +249,13 @@ void free_user_pages( struct task_struct *task )
 		return;
 	}
 
-	int pag;
+
 	page_table_entry * process_PT =  get_PT(task);
-	/* DATA */
-	for (pag=0;pag<NUM_PAG_DATA;pag++){
-		free_frame(process_PT[PAG_LOG_INIT_DATA+pag].bits.pbase_addr);
-		process_PT[PAG_LOG_INIT_DATA+pag].entry = 0;
+
+	/* DATA and HEAP */
+	for (int pag = PAG_LOG_INIT_DATA; pag < first_free_page(); pag++){
+		free_frame(process_PT[pag].bits.pbase_addr);
+		process_PT[pag].entry = 0;
 	}
 }
 

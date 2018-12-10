@@ -316,24 +316,18 @@ struct semaphore *get_free_sem() {
 	return NULL;
 }
 
-// returns the amount of pages we need to store bytes bytes
-int num_heap_pages(int bytes) {
-	return bytes / PAGE_SIZE + !!(bytes % PAGE_SIZE);
-}
 
-int curr_heap_pages() {
-	return num_heap_pages(current()->brk);
-}
-
-int first_free_page() {
-	return num_heap_pages(current()->brk) + PAG_LOG_INIT_HEAP;
-}
 
 int sys_sbrk(int inc) {
 	int prev = current()->brk;
 	int prevPageIndex = first_free_page();
 
+	// system imposed limit on per process heap
+	if (current()->brk + inc >= MAX_HEAP) return -ENOMEM; 
+
 	current()->brk += inc;
+
+	if (current()->brk < 0) current()->brk = 0;
 
 	int newPageIndex = first_free_page();
 	int pageDiff = newPageIndex - prevPageIndex;
