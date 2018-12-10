@@ -47,19 +47,65 @@ void test_sbrk() {
 	if (pid == 0) exit();
 }
 
+void test_block_read_cutre() {
+	int pid = fork();
+	char buf[4];
+	if (pid != 0) {
+		w("parent start\n");
+		// replace this with yield() syscall (already implemented)
+		while (1) {
+			struct stats st;
+			get_stats(getpid(), &st);
+			if (st.total_trans > 1) break;
+		}
+
+		w("parent after yield\n");
+		struct stats st;
+		get_stats(getpid(), &st);
+		w("parent end\n");
+		
+	} else {
+		w("child start\n");
+		read(0, buf, 3);
+		w("child end, read: "); w(buf); w("\n");
+	}
+}
+
 extern void runjp();
 int __attribute__ ((__section__(".text.main")))
   main(void)
 {
 	w("Hello from userland\n");
 
-//	sbrk(1<<10);
-	runjp();
+	// this works correctly:
+	//test_block_read_cutre();
+
+	/*
+
+In the following output the dots (...) are cpu_idle routine:
+
+* Running Test [7] : [testStatsBlocked] READ(get stats of a process blocked by reading keyboard )
+ sys_fork
+
+ sys_read start
+ 
+Waiting a context switch...
+
+Current Ready->Run transitions: 1; Remain quantum: 42
+Looping until Context Switch...
+
+Final Ready->Run transitions: 2; Remain quantum: 42; Iterations: 25001/1000000
+USER INTERACTION NEEDED: Enter 5 characters '12345'..............12..3.4..5
+ sys_read end
+..............................................
+
+	*/
+	runjp_rank(7,7);
 
 
 	
 
-	while(1);
+	while(1) {}
 	return 0;
 }
 

@@ -184,7 +184,7 @@ struct task_struct* current()
 
 
 int needs_sched_rr() {
-	return current()->quantum <= ticks && !list_empty(&readyqueue);
+	return current()->quantum <= ticks;// && !list_empty(&readyqueue);
 }
 
 void update_sched_data_rr() {

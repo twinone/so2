@@ -99,13 +99,16 @@ int sys_read_keyboard(char *user_buf, int count) {
 }	
 
 int sys_read(int fd, char *buf, int count) {
+	printk("\n sys_read start\n");
 	int e = check_fd(fd, LECTURA);
 	if(e != 0) return e;
 	if (!access_ok(VERIFY_WRITE, buf, count)) {
 		return -EFAULT;
 	}
 
-	return sys_read_keyboard(buf, count);
+	int ret =  sys_read_keyboard(buf, count);
+	printk("\n sys_read end\n");
+	return ret;
 }
 
 
@@ -198,7 +201,7 @@ int sys_clone(void (*ret_from_clone)(), void *stack) {
 
 
 int sys_fork() {
-	//printk("\n sys_fork start\n");
+	printk("\n sys_fork\n");
 	if (list_empty(&freequeue)) {
 		printk("\n sys_fork no free process, try again\n");
 		return -EAGAIN;
@@ -274,7 +277,7 @@ struct task_struct *ts_from_pid(int pid) {
 
 
 int sys_get_stats(int pid, struct stats* st) {
-
+	//printk("\n sys_get_stats start\n");
 	if (pid < 0)  return -EINVAL;
 	if (st == NULL) return -EFAULT;
 	struct task_struct *t = ts_from_pid(pid);
@@ -287,11 +290,11 @@ int sys_get_stats(int pid, struct stats* st) {
 	
 	if(t->state == ST_READY) {
 		int total_ticks = get_ticks();
-		t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;;
+		t->stats.ready_ticks += total_ticks - t->stats.elapsed_total_ticks;
 		t->stats.elapsed_total_ticks = total_ticks;
 	}
 
-	if(t->state == ST_READY) {
+	if(t->state == ST_BLOCKED) {
 		int total_ticks = get_ticks();
 		t->stats.blocked_ticks += total_ticks - t->stats.elapsed_total_ticks;
 		t->stats.elapsed_total_ticks = total_ticks;
@@ -299,6 +302,7 @@ int sys_get_stats(int pid, struct stats* st) {
 	}	
 
 	copy_to_user(&t->stats, st, sizeof(struct stats));
+	//printk("\n sys_get_stats end\n");
 	return 0;
 }
 
