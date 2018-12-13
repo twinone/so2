@@ -214,7 +214,7 @@ void update_process_state_rr_impl(struct task_struct *t, struct list_head *dest,
 
 		if(t != idle_task) list_del(&t->anchor);
 	}
-	if (dest != NULL) {
+	if (dest != NULL && t != idle_task) {
 		if (!start) list_add_tail(&t->anchor, dest);
 		else list_add(&t->anchor, dest);
 	}
